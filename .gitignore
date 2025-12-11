@@ -1,0 +1,27 @@
+# Build artifacts
+*.exe
+*.dll
+*.obj
+*.o
+*.log
+
+# ImGui config
+imgui.ini
+
+# VS Code settings
+.vscode/
+
+# --- BUILD FOLDERS ---
+
+# vs build
+build/
+# GNU build
+buildGNU/
+
+# --- LARGE ASSETS ---
+
+# some assets
+assets/audio/
+assets/skybox
+# vcpkg
+vcpkg_installed/
