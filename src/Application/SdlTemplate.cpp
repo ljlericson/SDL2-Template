@@ -16,7 +16,7 @@ namespace App
 		m_renderer = std::make_unique<Core::SDLBackend::Renderer>(*m_window);
 
 		m_scrabbleBoard = GameComponents::Board(*m_renderer);
-		m_inputListener.attach(m_scrabbleBoard);
+		m_eventDispatcher.attach(m_scrabbleBoard);
 
 		// imgui init
 		/*IMGUI_CHECKVERSION();
@@ -35,8 +35,13 @@ namespace App
 
 			m_scrabbleBoard.render(*m_renderer);
 
+			if (std::find(m_window->getUnhandledEvents().begin(), m_window->getUnhandledEvents().end(),
+				SDL_EVENT_KEY_DOWN) != m_window->getUnhandledEvents().end())
+				m_eventDispatcher.queueEvent(EventType::screenShake);
+
+
 			m_renderer->postRender();
-			m_inputListener.poll();
+			m_eventDispatcher.poll();
 
 			/*ImGui_ImplSDL3_NewFrame();
 			ImGui::NewFrame();

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <SDL3/SDL.h>
+#include <nlohmann/json.hpp>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <imgui.h>
@@ -12,8 +13,7 @@
 #include "../Core/SDL2Backend/Window.hpp"
 #include "../Core/SDL2Backend/Texture.hpp"
 #include "../Core/SDL2Backend/Renderer.hpp"
-#include "InputSystem/InputListener.hpp"
-#include "InputSystem/BasicInputObserver.hpp"
+#include "EventSystem/EventDispatcher.hpp"
 
 #include "GameComponents/Board.hpp"
 
@@ -32,7 +32,7 @@ namespace App
 	private:
 		std::unique_ptr<Core::SDLBackend::Window> m_window;
 		std::unique_ptr<Core::SDLBackend::Renderer> m_renderer;
-		InputSystem::InputListener m_inputListener;
+		EventSystem::EventDispatcher m_eventDispatcher;
 
 		GameComponents::Board m_scrabbleBoard;
 	};

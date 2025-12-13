@@ -6,6 +6,7 @@
 #include "../../Core/SDL2Backend/Renderer.hpp"
 #include "../../Core/AssetManager/AssetManager.hpp"
 #include "../../Core/SDL2Backend/Texture.hpp"
+#include "../../Utils/Utils.hpp"
 
 namespace App
 {
@@ -20,11 +21,12 @@ namespace App
 
 			void render(const Core::SDLBackend::Renderer& renderer) const override;
 
-			void onInput(const bool* keyboardState) override;
+			void onInput(const bool* keyboardState, EventType e) override;
 
 		private:
 			Core::SDLBackend::Texture* m_tex = nullptr;
-			SDL_FRect m_texRect;
+			mutable SDL_FRect m_texRect;
+			SDL_FRect m_texRectOriginal;
 		};
 	}
 }
