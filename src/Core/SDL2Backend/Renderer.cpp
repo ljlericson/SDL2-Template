@@ -23,6 +23,15 @@ namespace Core
 				std::cerr << "ERROR: Texture failed to render " << SDL_GetError() << '\n';
 		}
 
+		void Renderer::render(SDL_FRect rect, SDL_Color col, DrawType type) const
+		{
+			if (type == DrawType::fill)
+			{
+				SDL_SetRenderDrawColor(m_rendHand, col.r, col.g, col.b, col.a);
+				SDL_RenderRect(m_rendHand, &rect);
+			}
+		}
+
 		void Renderer::postRender()
 		{
 			SDL_RenderPresent(m_rendHand);

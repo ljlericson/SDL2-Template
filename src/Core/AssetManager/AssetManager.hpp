@@ -1,3 +1,4 @@
+#pragma once
 #include <memory>
 #include "TextureManager.hpp"
 #include "AudioBufferManager.hpp"

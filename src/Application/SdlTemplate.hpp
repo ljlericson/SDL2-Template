@@ -16,8 +16,10 @@
 #include "EventSystem/EventDispatcher.hpp"
 
 #include "GameComponents/Board.hpp"
+#include "GameComponents/Tile.hpp"
+#include "GameComponents/TileHighlighter.hpp"
 
-
+#include "../Utils/Utils.hpp"
 
 
 namespace App
@@ -35,5 +37,7 @@ namespace App
 		EventSystem::EventDispatcher m_eventDispatcher;
 
 		GameComponents::Board m_scrabbleBoard;
+		GameComponents::TileHighlighter m_highlighter;
+		std::vector<GameComponents::Tile> m_tiles;
 	};
 }

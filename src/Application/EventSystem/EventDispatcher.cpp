@@ -1,5 +1,6 @@
 #include "EventDispatcher.hpp"
 #include "../GameComponents/Board.hpp"
+#include "../GameComponents/Tile.hpp"
 
 namespace App
 {
@@ -62,4 +63,7 @@ namespace App
 
 	template void EventSystem::EventDispatcher::attach<App::GameComponents::Board>(App::GameComponents::Board&);
 	template void EventSystem::EventDispatcher::dettach<App::GameComponents::Board>(App::GameComponents::Board&);
+
+	template void EventSystem::EventDispatcher::attach<App::GameComponents::Tile>(App::GameComponents::Tile&);
+	template void EventSystem::EventDispatcher::dettach<App::GameComponents::Tile>(App::GameComponents::Tile&);
 }

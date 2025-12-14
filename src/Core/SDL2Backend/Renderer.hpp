@@ -18,11 +18,19 @@ namespace Core
 		class Renderer
 		{
 		public:
+			enum class DrawType
+			{
+				outline,
+				fill
+			};
+
 			Renderer(const Window& window);
 
 			void preRender();
 
 			void render(const Texture& tex, SDL_FRect texRect) const;
+
+			void render(SDL_FRect rect, SDL_Color col, DrawType type) const;
 
 			void postRender();
 

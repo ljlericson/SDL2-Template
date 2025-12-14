@@ -1,3 +1,4 @@
+#pragma once
 #include "../EventSystem/BasicEventObserver.hpp"
 #include "../../Core/SDL2Backend/Renderer.hpp"
 
