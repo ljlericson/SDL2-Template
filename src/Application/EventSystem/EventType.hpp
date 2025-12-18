@@ -3,5 +3,8 @@
 enum class EventType
 {
 	noEvent,
-	screenShake
+	screenShake,
+	gameStart,
+	gameEnd,
+	roundStart,
 };

@@ -1,6 +1,7 @@
 #include "EventDispatcher.hpp"
 #include "../GameComponents/Board.hpp"
 #include "../GameComponents/Tile.hpp"
+#include "../GameComponents/PlayerHand.hpp"
 
 namespace App
 {
@@ -36,6 +37,18 @@ namespace App
 				std::cout << "WARNING: No observer found InputListener::dettach()\n";
 		}
 
+		void EventDispatcher::reserveObserverVectorCapacity(size_t numObservers)
+		{
+			if (m_observers.capacity() < numObservers)
+				m_observers.reserve(numObservers);
+		}
+
+		auto EventDispatcher::getObserverVectorIterators()
+			-> std::pair<std::vector<BasicEventObserver*>::iterator, std::vector<BasicEventObserver*>::iterator> const
+		{
+			return { m_observers.begin(), m_observers.end() };
+		}
+
 		void EventDispatcher::queueEvent(EventType e)
 		{
 			m_eventQueue.push_back(e);
@@ -48,8 +61,10 @@ namespace App
 
 			if(!m_eventQueue.empty())
 			{
-				for (BasicEventObserver* observer : m_observers)
-					observer->onInput(keyboardState, m_eventQueue.front());
+				// avoid invalid iterators from playerhand
+				// increasing m_observers on certain update
+				for (size_t i = 0; i < m_observers.size(); i++)
+					m_observers.at(i)->onInput(keyboardState, m_eventQueue.front());
 
 				m_eventQueue.erase(m_eventQueue.begin());
 			}
@@ -66,4 +81,7 @@ namespace App
 
 	template void EventSystem::EventDispatcher::attach<App::GameComponents::Tile>(App::GameComponents::Tile&);
 	template void EventSystem::EventDispatcher::dettach<App::GameComponents::Tile>(App::GameComponents::Tile&);
+
+	template void EventSystem::EventDispatcher::attach<App::GameComponents::PlayerHand>(App::GameComponents::PlayerHand&);
+	template void EventSystem::EventDispatcher::dettach<App::GameComponents::PlayerHand>(App::GameComponents::PlayerHand&);
 }

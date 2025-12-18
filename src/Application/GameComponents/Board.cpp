@@ -6,10 +6,7 @@ namespace App
 	{
 		Board::Board(const Core::SDLBackend::Renderer& renderer, const Core::SDLBackend::Window& window)
 		{
-			m_occupiedTiles = std::make_unique<bool[]>(m_numTiles * m_numTiles);
-			std::fill_n(m_occupiedTiles.get(), m_numTiles * m_numTiles, false);
-
-			m_tex = Core::AssetManager::textureManager->newTexture("Board", renderer.getRendHand(), "./assets/textures/board2.png");
+			m_tex = Core::AssetManager::textureManager->newTexture("Board", renderer.getRendHand(), "./assets/textures/board.png");
 			auto [w, h] = Utils::getWindowSize();
 
 			m_texRectShaking.h = static_cast<float>(h);
@@ -20,7 +17,7 @@ namespace App
 			m_texRect = m_texRectShaking;
 		}
 
-		void Board::render(const Core::SDLBackend::Renderer& renderer) const
+		void Board::render(const Core::SDLBackend::Renderer& renderer)
 		{
 			auto [w, h] = Utils::getWindowSize();
 			m_texRect.h = static_cast<float>(h);
@@ -47,7 +44,8 @@ namespace App
 
 		}
 
-		auto Board::snapTile(glm::vec2 pos) -> std::expected<std::pair<glm::vec2, size_t>, SnapErrType>
+
+		void Board::addTileToBoard(Tile* tile)
 		{
 			constexpr float snapMargin = 10.0f;
 
@@ -57,49 +55,77 @@ namespace App
 			const float maxY = m_texRect.y + m_texRect.h;
 
 			// Reject if too far from board
-			if (pos.x < minX - snapMargin || pos.x > maxX + snapMargin ||
-				pos.y < minY - snapMargin || pos.y > maxY + snapMargin)
+			if (tile->pos.x < minX - snapMargin || tile->pos.x > maxX + snapMargin ||
+				tile->pos.y < minY - snapMargin || tile->pos.y > maxY + snapMargin)
 			{
-				return std::unexpected(SnapErrType::tooFarFromBoard);
+				auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
+				if (it != m_tiles.end())
+					m_tiles.erase(it);
+
+				tile->snapToTile(SIZE_MAX);
+				return;
 			}
 
 			const float tileSize = m_texRect.w / static_cast<float>(m_numTiles);
 
 			// Convert to board-local space
-			const float localX = pos.x - minX;
-			const float localY = pos.y - minY;
+			const float localX = tile->pos.x - minX;
+			const float localY = tile->pos.y - minY;
 
-			// Nearest tile index (FIXED OFFSET BUG)
-			const int tileX = static_cast<int>(
-				std::floor((localX + tileSize * 0.5f) / tileSize)
-				);
-			const int tileY = static_cast<int>(
-				std::floor((localY + tileSize * 0.5f) / tileSize)
-				);
+			// Tile index based on top-left corner
+			const int tileX = static_cast<int>(std::floor(localX / tileSize));
+			const int tileY = static_cast<int>(std::floor(localY / tileSize));
+
+			const size_t index = static_cast<size_t>(tileY) * m_numTiles + tileX;
 
 			// Validate indices
 			if (tileX < 0 || tileX >= static_cast<int>(m_numTiles) ||
 				tileY < 0 || tileY >= static_cast<int>(m_numTiles))
 			{
-				return std::unexpected(SnapErrType::tooFarFromBoard);
+				auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
+				if (it != m_tiles.end())
+					m_tiles.erase(it);
+
+				tile->snapToTile(SIZE_MAX);
 			}
 
-			// Occupancy check
-			const size_t index = static_cast<size_t>(tileY) * m_numTiles + tileX;
-			if (m_occupiedTiles[index])
+			auto isOccupied = [&](int x, int y) -> bool
 			{
-				return std::unexpected(SnapErrType::spotOccupied);
+				if (x < 0 || x >= static_cast<int>(m_numTiles) ||
+					y < 0 || y >= static_cast<int>(m_numTiles))
+					return false;
+
+				for (const Tile* tile : m_tiles);
+				{
+					if (tile->getIndex() == y * m_numTiles + x)
+						return true;
+				}
+				return false;
+			};
+
+			const bool hasAdjacent =
+				isOccupied(tileX - 1, tileY) || // left
+				isOccupied(tileX + 1, tileY) || // right
+				isOccupied(tileX, tileY - 1) || // up
+				isOccupied(tileX, tileY + 1);  // down
+
+			// Allow placement if first tile or adjacent
+			if (!hasAdjacent && index != (m_numTiles * m_numTiles - 1) / 2)
+			{
+				auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
+				if (it != m_tiles.end())
+					m_tiles.erase(it);
+
+				tile->snapToTile(SIZE_MAX);
+				return;
 			}
 
-			// Snap to tile center
-			const float snappedX = minX + tileX * tileSize;
-			const float snappedY = minY + tileY * tileSize;
-
-			m_occupiedTiles[index] = true;
-			return std::pair{ glm::vec2(snappedX, snappedY), index };
+			// success
+			tile->snapToTile(index);
+			m_tiles.push_back(tile);
 		}
 
-		size_t Board::getSnapTileIndex(glm::vec2 pos) 
+		size_t Board::getSnapTileIndex(glm::vec2 pos)
 		{
 			constexpr float snapMargin = 10.0f;
 
@@ -134,12 +160,6 @@ namespace App
 
 			const size_t index = static_cast<size_t>(tileY) * m_numTiles + tileX;
 			return index;
-		}
-
-		void Board::unCheckTile(size_t tile)
-		{
-			if(tile != SIZE_MAX)
-				m_occupiedTiles[tile] = false;
 		}
 
 		size_t Board::getNumTiles() const

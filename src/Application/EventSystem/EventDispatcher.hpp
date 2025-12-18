@@ -21,12 +21,18 @@ namespace App
 		public:
 			EventDispatcher() = default;
 
+
 			template<class T> requires std::is_base_of_v<BasicEventObserver, T>
 			void attach(T& observer);
 
 			template<class T> requires std::is_base_of_v<BasicEventObserver, T>
 			void dettach(T& observer);
 
+			void reserveObserverVectorCapacity(size_t numObservers);
+
+			auto getObserverVectorIterators()
+				-> std::pair<std::vector<BasicEventObserver*>::iterator, std::vector<BasicEventObserver*>::iterator> const;
+			
 			void queueEvent(EventType e);
 
 			void poll();

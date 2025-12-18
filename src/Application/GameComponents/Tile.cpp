@@ -15,16 +15,44 @@ namespace App
 			m_texRect.h = h / static_cast<float>(numTiles);
 			m_texRect.w = h / static_cast<float>(numTiles);
 			pos.x = static_cast<float>(w) - m_texRect.w - (sm_numTiles * m_texRect.w);
-			pos.y = static_cast<float>(h) - m_texRect.h;
+			pos.y = static_cast<float>(h) - m_texRect.h - 50.0f;
 
 			m_startPos = pos;
 		}
 
-		void Tile::render(const Core::SDLBackend::Renderer& renderer) const
+		void Tile::render(const Core::SDLBackend::Renderer& renderer)
 		{
 			m_texRect.x = pos.x;
 			m_texRect.y = pos.y;
 			renderer.render(*m_tex, m_texRect);
+		}
+
+		void Tile::glideToStartPos()
+		{
+			sm_numTiles++;
+			m_glidingToStart = true;
+		}
+
+		void Tile::snapToTile(size_t index)
+		{
+			sm_numTiles--;
+			m_index = index;
+
+			if (m_index == SIZE_MAX)
+			{
+				std::cout << "FAILED\n";
+				this->glideToStartPos();
+				return;
+			}
+
+			auto [w, h] = Utils::getWindowSize();
+			const float tileSize = h / static_cast<float>(sm_numTiles);
+
+			const size_t tileY = m_index / sm_numTiles;
+			const size_t tileX = m_index % sm_numTiles;
+
+			pos.x = tileX * tileSize;
+			pos.y = tileY * tileSize;
 		}
 
 		void Tile::onInput(const bool* keyboardState, EventType e)
@@ -39,6 +67,14 @@ namespace App
 			default:
 				break;
 			}
+
+			if (m_glidingToStart && pos != m_startPos)
+			{
+				pos.x += (getStartPos().x - pos.x) / 25.0f;
+				pos.y += (getStartPos().y - pos.y) / 25.0f;
+			}
+			else if(pos == m_startPos)
+				m_glidingToStart = false;
 		}
 
 		Tile::PressState Tile::handlePress()
@@ -59,10 +95,10 @@ namespace App
 				   (((m_ctrPressed) && (sm_tilePressEngaged) && (m_tilePressed))))
 
 										&&
-					// check that the mouse curser is over the 
+					// check that the mouse curser is over the tile
 					     (((mouseX > minX && mouseX < maxX) &&
 					       (mouseY > minY && mouseY < maxY))     
-						  || m_tilePressed) // or the tile is pressed (bug fix)
+						  || m_tilePressed) // or the tile is already pressed (bug fix)
 				)
 			{
 				pos.x = mouseX - (m_texRect.w / 2.0f);
@@ -72,6 +108,8 @@ namespace App
 				sm_tilePressEngaged = true;
 				return PressState::pressed;
 			}
+			// control not pressed and tile engaged means
+			// user has just released tile
 			else if (!m_ctrPressed && m_tilePressed)
 			{
 				m_tilePressed = false;
@@ -79,17 +117,18 @@ namespace App
 				return PressState::justReleased;
 			}
 
+			// else tile isnt engaged
 			return PressState::notPressed;
 		}
 
-		glm::vec2 Tile::getStartPos()
+		glm::vec2 Tile::getStartPos() const
 		{
 			return m_startPos;
 		}
 
-		Tile::~Tile()
+		size_t Tile::getIndex() const
 		{
-			sm_numTiles--;
+			return m_index;
 		}
 	}
 }

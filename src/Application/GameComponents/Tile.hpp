@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 #include <SDL3/SDL.h>
 
@@ -23,28 +24,37 @@ namespace App
 			};
 
 			Tile() = default;
+			~Tile() = default;
 
 			Tile(const Core::SDLBackend::Renderer& renderer, size_t numTiles);
 
-			void render(const Core::SDLBackend::Renderer& renderer) const override;
+			void render(const Core::SDLBackend::Renderer& renderer);
+
+			void glideToStartPos();
+
+			void snapToTile(size_t index);
 
 			void onInput(const bool* keyboardState, EventType e) override;
 
 			PressState handlePress();
 
-			glm::vec2 getStartPos();
+			glm::vec2 getStartPos() const;
 
-			~Tile();
+			size_t getIndex() const;
 
 		public:
 			glm::vec2 pos;
-			size_t index = SIZE_MAX;
 		private:
 			Core::SDLBackend::Texture* m_tex;
-			mutable SDL_FRect m_texRect;
+			SDL_FRect m_texRect;
 			glm::vec2 m_startPos;
+
 			bool m_ctrPressed = false;
 			bool m_tilePressed = false;
+			bool m_glidingToStart = false;
+
+			size_t m_index = SIZE_MAX;
+
 			inline static size_t sm_numTiles = 0;
 			inline static bool sm_tilePressEngaged = false;
 		};

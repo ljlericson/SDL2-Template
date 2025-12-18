@@ -16,9 +16,7 @@
 #include "EventSystem/EventDispatcher.hpp"
 
 #include "GameComponents/Board.hpp"
-#include "GameComponents/Tile.hpp"
-#include "GameComponents/TileHighlighter.hpp"
-
+#include "GameComponents/PlayerHand.hpp"
 #include "../Utils/Utils.hpp"
 
 
@@ -34,10 +32,10 @@ namespace App
 	private:
 		std::unique_ptr<Core::SDLBackend::Window> m_window;
 		std::unique_ptr<Core::SDLBackend::Renderer> m_renderer;
-		EventSystem::EventDispatcher m_eventDispatcher;
 
+		std::unique_ptr<GameComponents::PlayerHand> m_playerHand;
 		GameComponents::Board m_scrabbleBoard;
-		GameComponents::TileHighlighter m_highlighter;
-		std::vector<GameComponents::Tile> m_tiles;
+
+		EventSystem::EventDispatcher m_eventDispatcher;
 	};
 }

@@ -28,6 +28,11 @@ namespace Core
 			if (type == DrawType::fill)
 			{
 				SDL_SetRenderDrawColor(m_rendHand, col.r, col.g, col.b, col.a);
+				SDL_RenderFillRect(m_rendHand, &rect);
+			}
+			else
+			{
+				SDL_SetRenderDrawColor(m_rendHand, col.r, col.g, col.b, col.a);
 				SDL_RenderRect(m_rendHand, &rect);
 			}
 		}
