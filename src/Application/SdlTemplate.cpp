@@ -10,6 +10,9 @@ namespace App
         if (!SDL_Init(SDL_INIT_VIDEO))
             std::cerr << "SDL video failed to init, error: " << SDL_GetError() << '\n';
 
+		if (!TTF_Init())
+			std::cerr << "TTF failed to init, error: " << SDL_GetError() << '\n';
+
 		SDL_Log("SDL version: %d", SDL_GetVersion());
 		
 		m_window = std::make_unique<Core::SDLBackend::Window>("sdltemplate", 1280, 720);

@@ -16,6 +16,7 @@ namespace Core
 		{
 			Texture() = default;
 			Texture(SDL_Renderer* renderer, const std::string& fpath);
+			Texture(SDL_Texture* texture);
 			~Texture();
 			
 			SDL_Texture* texHand = nullptr;

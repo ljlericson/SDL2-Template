@@ -1,6 +1,8 @@
 #pragma once
 #include <expected>
 #include <memory>
+#include <vector>
+#include <string>
 #include <algorithm>
 
 #include <SDL3/SDL.h>
@@ -44,10 +46,13 @@ namespace App
 		private:
 			// tiles
 			std::vector<Tile*> m_tiles;
+			std::vector<std::string> m_words;
 			// board renderering
 			Core::SDLBackend::Texture* m_tex = nullptr;
 			SDL_FRect m_texRect;
 			SDL_FRect m_texRectShaking;
+			
+			bool m_firstTile = true;
 
 			// config items
 			size_t m_numTiles = 15; // number of tiles lengthwise |--->|

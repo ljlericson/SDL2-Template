@@ -25,6 +25,12 @@ namespace Core
             }
 		}
 
+        Texture::Texture(SDL_Texture* texture)
+            : texHand(texture)
+        {
+
+        }
+
 		Texture::~Texture()
 		{
 			if(texHand)

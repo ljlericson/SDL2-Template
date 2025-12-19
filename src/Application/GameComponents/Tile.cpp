@@ -5,9 +5,13 @@ namespace App
 	namespace GameComponents
 	{
 		Tile::Tile(const Core::SDLBackend::Renderer& renderer, size_t numTiles)
-			: pos(0.0f)
+			: pos(0.0f), m_numTilesOnBoard(numTiles), m_char("")
 		{
 			sm_numTiles++;
+
+
+			if(!sm_font)
+				sm_font = TTF_OpenFont("./assets/font.ttf", 32);
 
 			m_tex = Core::AssetManager::textureManager->newTexture("Tile", renderer.getRendHand(), "./assets/textures/test.jpg");
 
@@ -17,6 +21,9 @@ namespace App
 			pos.x = static_cast<float>(w) - m_texRect.w - (sm_numTiles * m_texRect.w);
 			pos.y = static_cast<float>(h) - m_texRect.h - 50.0f;
 
+			//const char* character = const_cast<char*>(&m_char);
+			m_char = { char('A' + Utils::getRandomInt(0, 24)) };
+
 			m_startPos = pos;
 		}
 
@@ -24,7 +31,17 @@ namespace App
 		{
 			m_texRect.x = pos.x;
 			m_texRect.y = pos.y;
+			if(!m_textTexture.texHand)
+			{
+				SDL_Surface* textSurface = TTF_RenderText_Solid(sm_font, m_char.c_str(), m_char.length(), SDL_Color(255, 0, 0, 255));
+				if (!textSurface)
+					std::cout << "TEXT ERR: " << SDL_GetError() << '\n';
+				m_textTexture = std::move(Core::SDLBackend::Texture(SDL_CreateTextureFromSurface(renderer.getRendHand(), textSurface)));
+				SDL_DestroySurface(textSurface);
+			}
+
 			renderer.render(*m_tex, m_texRect);
+			renderer.render(m_textTexture, m_texRect);
 		}
 
 		void Tile::glideToStartPos()
@@ -46,10 +63,10 @@ namespace App
 			}
 
 			auto [w, h] = Utils::getWindowSize();
-			const float tileSize = h / static_cast<float>(sm_numTiles);
+			const float tileSize = h / static_cast<float>(m_numTilesOnBoard);
 
-			const size_t tileY = m_index / sm_numTiles;
-			const size_t tileX = m_index % sm_numTiles;
+			const size_t tileY = m_index / m_numTilesOnBoard;
+			const size_t tileX = m_index % m_numTilesOnBoard;
 
 			pos.x = tileX * tileSize;
 			pos.y = tileY * tileSize;
@@ -70,11 +87,14 @@ namespace App
 
 			if (m_glidingToStart && pos != m_startPos)
 			{
-				pos.x += (getStartPos().x - pos.x) / 25.0f;
-				pos.y += (getStartPos().y - pos.y) / 25.0f;
+				pos.x += (getStartPos().x - pos.x) / 10.0f;
+				pos.y += (getStartPos().y - pos.y) / 10.0f;
 			}
-			else if(pos == m_startPos)
+			if(glm::distance(pos, m_startPos) < 10.0f)
+			{
+				pos = m_startPos;
 				m_glidingToStart = false;
+			}
 		}
 
 		Tile::PressState Tile::handlePress()
@@ -114,6 +134,8 @@ namespace App
 			{
 				m_tilePressed = false;
 				sm_tilePressEngaged = false;
+				pos.x = mouseX - (m_texRect.w / 2.0f);
+				pos.y = mouseY - (m_texRect.h / 2.0f);
 				return PressState::justReleased;
 			}
 

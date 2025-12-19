@@ -24,6 +24,9 @@ namespace Core
 				fill
 			};
 
+			Renderer(const Renderer&) = delete;
+			Renderer& operator=(const Renderer&) = delete;
+
 			Renderer(const Window& window);
 
 			void preRender();

@@ -20,11 +20,13 @@ namespace App
 			{
 				std::unique_ptr<Tile>& tile = tileReference.get();
 
-				if (tile->handlePress() == GameComponents::Tile::PressState::justReleased)
+				auto result = tile->handlePress();
+
+				if (result == GameComponents::Tile::PressState::justReleased)
 				{
 					scrabbleBoard.addTileToBoard(tile.get());
 				}
-				else if (tile->handlePress() == GameComponents::Tile::PressState::pressed)
+				else if (result == GameComponents::Tile::PressState::pressed)
 				{
 					auto [w, h] = Utils::getWindowSize();
 					const float numTiles = static_cast<float>(scrabbleBoard.getNumTiles());

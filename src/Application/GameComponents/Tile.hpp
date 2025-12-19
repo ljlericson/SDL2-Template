@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "BasicGameComponent.hpp"
 #include "../../Core/AssetManager/AssetManager.hpp"
@@ -42,6 +43,8 @@ namespace App
 
 			size_t getIndex() const;
 
+			const char getTileChar() const;
+
 		public:
 			glm::vec2 pos;
 		private:
@@ -54,9 +57,14 @@ namespace App
 			bool m_glidingToStart = false;
 
 			size_t m_index = SIZE_MAX;
+			size_t m_numTilesOnBoard = 0;
+
+			std::string m_char;
+			Core::SDLBackend::Texture m_textTexture;
 
 			inline static size_t sm_numTiles = 0;
 			inline static bool sm_tilePressEngaged = false;
+			inline static TTF_Font* sm_font = nullptr;
 		};
 	}
 }

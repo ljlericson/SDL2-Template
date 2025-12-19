@@ -54,9 +54,16 @@ namespace App
 			const float maxX = m_texRect.x + m_texRect.w;
 			const float maxY = m_texRect.y + m_texRect.h;
 
-			// Reject if too far from board
-			if (tile->pos.x < minX - snapMargin || tile->pos.x > maxX + snapMargin ||
-				tile->pos.y < minY - snapMargin || tile->pos.y > maxY + snapMargin)
+			// --- compute tile center (input is top-left) ---
+			const float tileSize = m_texRect.w / static_cast<float>(m_numTiles);
+			const glm::vec2 centerPos{
+				tile->pos.x + tileSize * 0.5f,
+				tile->pos.y + tileSize * 0.5f
+			};
+
+			// --- bounds check ---
+			if (centerPos.x < minX - snapMargin || centerPos.x > maxX + snapMargin ||
+				centerPos.y < minY - snapMargin || centerPos.y > maxY + snapMargin)
 			{
 				auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
 				if (it != m_tiles.end())
@@ -66,19 +73,14 @@ namespace App
 				return;
 			}
 
-			const float tileSize = m_texRect.w / static_cast<float>(m_numTiles);
+			// --- convert to board-local ---
+			const float localX = centerPos.x - minX;
+			const float localY = centerPos.y - minY;
 
-			// Convert to board-local space
-			const float localX = tile->pos.x - minX;
-			const float localY = tile->pos.y - minY;
-
-			// Tile index based on top-left corner
 			const int tileX = static_cast<int>(std::floor(localX / tileSize));
 			const int tileY = static_cast<int>(std::floor(localY / tileSize));
 
-			const size_t index = static_cast<size_t>(tileY) * m_numTiles + tileX;
-
-			// Validate indices
+			// --- validate ---
 			if (tileX < 0 || tileX >= static_cast<int>(m_numTiles) ||
 				tileY < 0 || tileY >= static_cast<int>(m_numTiles))
 			{
@@ -87,40 +89,66 @@ namespace App
 					m_tiles.erase(it);
 
 				tile->snapToTile(SIZE_MAX);
+				return;
 			}
 
-			auto isOccupied = [&](int x, int y) -> bool
-			{
-				if (x < 0 || x >= static_cast<int>(m_numTiles) ||
-					y < 0 || y >= static_cast<int>(m_numTiles))
-					return false;
+			const size_t index = static_cast<size_t>(tileY) * m_numTiles + tileX;
 
-				for (const Tile* tile : m_tiles);
+			// --- reject if already occupied ---
+			for (const Tile* t : m_tiles)
+			{
+				if (t->getIndex() == index)
 				{
-					if (tile->getIndex() == y * m_numTiles + x)
-						return true;
+					auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
+					if (it != m_tiles.end())
+						m_tiles.erase(it);
+
+					tile->snapToTile(SIZE_MAX);
+					return;
 				}
-				return false;
-			};
+			}
+
+			// --- adjacency check ---
+			auto occupiedAt = [&](int x, int y) -> bool
+				{
+					if (x < 0 || x >= static_cast<int>(m_numTiles) ||
+						y < 0 || y >= static_cast<int>(m_numTiles))
+						return false;
+
+					const size_t idx = static_cast<size_t>(y) * m_numTiles + x;
+					for (const Tile* t : m_tiles)
+						if (t->getIndex() == idx)
+							return true;
+
+					return false;
+				};
 
 			const bool hasAdjacent =
-				isOccupied(tileX - 1, tileY) || // left
-				isOccupied(tileX + 1, tileY) || // right
-				isOccupied(tileX, tileY - 1) || // up
-				isOccupied(tileX, tileY + 1);  // down
+				occupiedAt(tileX - 1, tileY) ||
+				occupiedAt(tileX + 1, tileY) ||
+				occupiedAt(tileX, tileY - 1) ||
+				occupiedAt(tileX, tileY + 1);
 
-			// Allow placement if first tile or adjacent
-			if (!hasAdjacent && index != (m_numTiles * m_numTiles - 1) / 2)
+			if (m_tiles.empty())
 			{
-				auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
-				if (it != m_tiles.end())
-					m_tiles.erase(it);
+				// first tile MUST be center
+				if (index != (m_numTiles / 2) * m_numTiles + (m_numTiles / 2))
+				{
+					auto it = std::find(m_tiles.begin(), m_tiles.end(), tile);
+					if (it != m_tiles.end())
+						m_tiles.erase(it);
 
+					tile->snapToTile(SIZE_MAX);
+					return;
+				}
+			}
+			else if (!hasAdjacent)
+			{
 				tile->snapToTile(SIZE_MAX);
 				return;
 			}
 
-			// success
+			// --- success ---
 			tile->snapToTile(index);
 			m_tiles.push_back(tile);
 		}
