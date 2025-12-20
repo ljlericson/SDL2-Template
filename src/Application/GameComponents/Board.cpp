@@ -39,6 +39,8 @@ namespace App
 				m_texRectShaking.x += Utils::getRandomInt(0, 10);
 				m_texRectShaking.y += Utils::getRandomInt(0, 10);
 				break;
+			case EventType::gameEnd:
+				m_tiles.clear();
 			default:
 				break;
 			}

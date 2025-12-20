@@ -8,7 +8,7 @@ namespace App
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("TEST");
+		ImGui::Begin("CONTROLS");
 		if (ImGui::Button("End Round"))
 			m_eventDispatcher.queueEvent(EventType::roundEnd);
 		if (ImGui::Button("Start Round"))

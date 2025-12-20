@@ -34,6 +34,7 @@ namespace App
 	private:
 		void ImGuiRender();
 		void ImGuiPostRender();
+		void ImGuiTheme();
 	private:
 		std::unique_ptr<Core::SDLBackend::Window> m_window;
 		std::unique_ptr<Core::SDLBackend::Renderer> m_renderer;

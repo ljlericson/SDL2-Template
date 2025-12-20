@@ -50,7 +50,6 @@ namespace App
 		private:
 			// tiles
 			std::vector<Tile*> m_tiles;
-			std::vector<std::string> m_words;
 			// board renderering
 			Core::SDLBackend::Texture* m_tex = nullptr;
 			SDL_FRect m_texRect;
