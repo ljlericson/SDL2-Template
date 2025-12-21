@@ -213,5 +213,10 @@ namespace App
 		{
 			sm_numTiles++;
 		}
+
+		TTF_Font* Tile::getStaticFont()
+		{
+			return sm_font;
+		}
 	}
 }

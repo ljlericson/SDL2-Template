@@ -11,7 +11,7 @@
 
 #include "BasicEventObserver.hpp"
 #include "EventType.hpp"
-#include "../../Core/SDL2Backend/Window.hpp"
+#include "../../Core/SDLBackend/Window.hpp"
 
 namespace App
 {

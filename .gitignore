@@ -18,6 +18,8 @@ build/
 # GNU build
 buildGNU/
 
+diagnostics/
+
 # --- LARGE ASSETS ---
 
 # some assets

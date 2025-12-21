@@ -4,18 +4,20 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <fstream>
 #include <unordered_set>
 
+#include <nlohmann/json.hpp>
 #include <hunspell/hunspell.hxx>
 #include <SDL3/SDL.h>
 
 #include "BasicGameComponent.hpp"
 #include "Tile.hpp"
 #include "../EventSystem/EventDispatcher.hpp"
-#include "../../Core/SDL2Backend/Renderer.hpp"
-#include "../../Core/SDL2Backend/Window.hpp"
+#include "../../Core/SDLBackend/Renderer.hpp"
+#include "../../Core/SDLBackend/Window.hpp"
 #include "../../Core/AssetManager/AssetManager.hpp"
-#include "../../Core/SDL2Backend/Texture.hpp"
+#include "../../Core/SDLBackend/Texture.hpp"
 #include "../../Utils/Utils.hpp"
 
 namespace App
@@ -41,7 +43,7 @@ namespace App
 
 			void addTileToBoard(Tile* tile);
 
-			std::vector<size_t> getBadWordIndexes();
+			std::pair<std::vector<size_t>, int> getBadWordIndexesAndScore();
 
 			size_t getSnapTileIndex(glm::vec2 pos);
 
@@ -51,11 +53,14 @@ namespace App
 			// tiles
 			std::vector<Tile*> m_tiles;
 			// board renderering
-			Core::SDLBackend::Texture* m_tex = nullptr;
+			std::shared_ptr<Core::SDLBackend::Texture> m_tex = nullptr;
 			SDL_FRect m_texRect;
 			SDL_FRect m_texRectShaking;
 
 			Hunspell m_spellChecker;
+			nlohmann::json m_letterScores;
+
+			int m_score = 0;
 			
 			bool m_firstTile = true;
 

@@ -11,7 +11,8 @@
 #include "Board.hpp"
 #include "TileHighlighter.hpp"
 #include "../EventSystem/EventDispatcher.hpp"
-#include "../../Core/SDL2Backend/Renderer.hpp"
+#include "../../Core/SDLBackend/Renderer.hpp"
+#include "../../Core/SDLBackend/Text.hpp"
 
 
 namespace App
@@ -37,10 +38,13 @@ namespace App
 
 			GameComponents::TileHighlighter m_highlighter;
 			std::vector<size_t> m_badWordIndexes;
+			std::string m_scoreTextStr;
+			Core::SDLBackend::Text m_scoreText;
 
 			const Core::SDLBackend::Renderer& mr_renderer;
 			EventSystem::EventDispatcher& mr_eventDispatcher;
 
+			int m_score = 0;
 			uint8_t m_numRounds = 0;
 
 			// config items

@@ -16,6 +16,9 @@ namespace App
 			m_texRectShaking.y = 0.0f;
 
 			m_texRect = m_texRectShaking;
+
+			std::ifstream file("./config/tilePoints/tilePoints.json");
+			file >> m_letterScores;
 		}
 
 		void Board::render(const Core::SDLBackend::Renderer& renderer)
@@ -41,7 +44,6 @@ namespace App
 				break;
 			case EventType::gameEnd:
 				m_tiles.clear();
-			default:
 				break;
 			}
 
@@ -156,11 +158,11 @@ namespace App
 			m_tiles.push_back(tile);
 		}
 
-		std::vector<size_t> Board::getBadWordIndexes()
+		std::pair<std::vector<size_t>, int> Board::getBadWordIndexesAndScore()
 		{
 			const size_t N = m_numTiles;
+			int score = 0;
 
-			// Build board grid: index -> char
 			std::vector<char> grid(N * N, '\0');
 			for (const Tile* tile : m_tiles)
 			{
@@ -170,7 +172,7 @@ namespace App
 
 			std::unordered_set<size_t> badIndexes; // avoid duplicates
 
-			// -------- Horizontal scan --------
+			// horizontal scan
 			for (size_t y = 0; y < N; ++y)
 			{
 				std::string word;
@@ -188,22 +190,31 @@ namespace App
 					}
 					else
 					{
-						if (word.length() >= 2 && !m_spellChecker.spell(word))
+						if (!m_spellChecker.spell(word))
 						{
 							badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
+						}
+						else
+						{
+							for (char c : word)
+							{
+								std::string s;
+								s.push_back(c);
+								score += m_letterScores[s].get<int>();
+							}
 						}
 						word.clear();
 						wordIndexes.clear();
 					}
 				}
 
-				if (word.length() >= 2 && !m_spellChecker.spell(word))
+				if (!m_spellChecker.spell(word))
 				{
 					badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
 				}
 			}
 
-			// -------- Vertical scan --------
+			// vertical scan
 			for (size_t x = 0; x < N; ++x)
 			{
 				std::string word;
@@ -221,23 +232,33 @@ namespace App
 					}
 					else
 					{
-						if (word.length() >= 2 && !m_spellChecker.spell(word))
+						if (!m_spellChecker.spell(word))
 						{
 							badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
+						}
+						else
+						{
+							for (char c : word)
+							{
+								std::string s;
+								s.push_back(c);
+								score += m_letterScores[s].get<int>();
+							}
 						}
 						word.clear();
 						wordIndexes.clear();
 					}
 				}
 
-				if (word.length() >= 2 && !m_spellChecker.spell(word))
+				if (!m_spellChecker.spell(word))
 				{
 					badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
 				}
 			}
 
-			// Convert to vector
-			return std::vector<size_t>(badIndexes.begin(), badIndexes.end());
+			int mscore = m_score;
+			m_score = score;
+			return { std::vector<size_t>(badIndexes.begin(), badIndexes.end()), score - mscore };
 		}
 
 		size_t Board::getSnapTileIndex(glm::vec2 pos)

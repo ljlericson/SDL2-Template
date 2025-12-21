@@ -6,8 +6,8 @@
 
 #include "BasicGameComponent.hpp"
 #include "../../Core/AssetManager/AssetManager.hpp"
-#include "../../Core/SDL2Backend/Renderer.hpp"
-#include "../../Core/SDL2Backend/Texture.hpp"
+#include "../../Core/SDLBackend/Renderer.hpp"
+#include "../../Core/SDLBackend/Texture.hpp"
 #include "../../Utils/Utils.hpp"
 
 namespace App
@@ -55,10 +55,12 @@ namespace App
 
 			static void incrementSidePadding();
 
+			static TTF_Font* getStaticFont();
+
 		public:
 			glm::vec2 pos;
 		private:
-			Core::SDLBackend::Texture* m_tex;
+			std::shared_ptr<Core::SDLBackend::Texture> m_tex;
 			SDL_FRect m_texRect;
 			glm::vec2 m_startPos;
 
@@ -73,7 +75,7 @@ namespace App
 			size_t m_numTilesOnBoard = 0;
 
 			std::string m_char;
-			Core::SDLBackend::Texture* m_textTexture;
+			std::shared_ptr<Core::SDLBackend::Texture> m_textTexture;
 
 			inline static size_t sm_numTiles = 0;
 			inline static bool sm_tilePressEngaged = false;

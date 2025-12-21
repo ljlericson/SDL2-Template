@@ -11,9 +11,9 @@
 #include <imgui_impl_sdlrenderer3.h>
 
 #include "../Core/AssetManager/TextureManager.hpp"
-#include "../Core/SDL2Backend/Window.hpp"
-#include "../Core/SDL2Backend/Texture.hpp"
-#include "../Core/SDL2Backend/Renderer.hpp"
+#include "../Core/SDLBackend/Window.hpp"
+#include "../Core/SDLBackend/Texture.hpp"
+#include "../Core/SDLBackend/Renderer.hpp"
 #include "EventSystem/EventDispatcher.hpp"
 
 #include "GameComponents/Board.hpp"

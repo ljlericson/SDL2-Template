@@ -9,7 +9,8 @@ namespace App
 			  m_numTilesPerRound(numTilesPerRound),
 			  mr_renderer(renderer),
 			  mr_eventDispatcher(eventDispatcher),
-			  m_numTiles(numTiles)
+			  m_numTiles(numTiles),
+			  m_scoreText(glm::vec2(Utils::getWindowSize().first - 75.0f, 0.0f), 75, 32, "./assets/font.ttf", SDL_Color(0, 255, 0, 255), "SCORE: ___")
 		{
 			eventDispatcher.attach(*this);
 		}
@@ -25,7 +26,10 @@ namespace App
 				if (result == GameComponents::Tile::PressState::justReleased)
 				{
 					scrabbleBoard.addTileToBoard(tile.get());
-					m_badWordIndexes = scrabbleBoard.getBadWordIndexes();
+					int score;
+					std::tie(m_badWordIndexes, score) = scrabbleBoard.getBadWordIndexesAndScore();
+
+					m_score += score;
 				}
 				else if (result == GameComponents::Tile::PressState::pressed)
 				{
@@ -50,6 +54,16 @@ namespace App
 			}
 			for (size_t badTileIndes : m_badWordIndexes)
 				m_highlighter.render(renderer, badTileIndes);
+
+			/*m_scoreTextStr = m_scoreText.getText();
+			for (size_t i = 0; i < Utils::getNumDigits(m_score); i++)
+			{
+				m_scoreTextStr.erase(m_scoreTextStr.end());
+			}
+			m_scoreTextStr.append(std::to_string(m_score));*/
+			m_scoreText.setText(std::to_string(m_score));
+			m_scoreText.render(renderer);
+			//m_scoreTextStr = "Score: ___";
 		}
 
 		void PlayerHand::onInput(const bool* keyboardState, EventType e, const std::vector<uint32_t>& events)
@@ -57,6 +71,7 @@ namespace App
 			switch (e)
 			{
 			case EventType::gameStart:
+				m_score = 20;
 				// mr_eventDispatcher.reserveObserverVectorCapacity(m_numTilesPerRound);
 				for (size_t i = 0; i <= m_numTilesPerRound; i++)
 				{
@@ -74,11 +89,17 @@ namespace App
 
 				m_activeTiles.clear();
 				m_tiles.clear();
+				m_score = 0;
 				break;
 			case EventType::roundStart:
 				if (m_inactiveTiles.size() == m_numTilesPerRound)
 				{
 					std::cout << "NO MORE TILES\n";
+					break;
+				}
+				else if(m_activeTiles.size() > 0)
+				{
+					std::cout << "ROUND ALREADY STARTED\n";
 					break;
 				}
 
@@ -91,6 +112,11 @@ namespace App
 				}
 				break;
 			case EventType::roundEnd:
+				if (m_badWordIndexes.size() > 0)
+				{
+					std::cout << "ALL WORDS MUST BE CORRECTLY SPELLED\n";
+					return;
+				}
 				for (auto& tile : m_activeTiles)
 				{
 					const auto& tilePtr = tile.get();
@@ -110,6 +136,24 @@ namespace App
 				m_numRounds++;
 				break;
 			case EventType::shuffleTiles:
+
+				int numTilesToShuffle = 0;
+				for (auto& tile : m_activeTiles)
+				{
+					const auto& tilePtr = tile.get();
+					if (tilePtr->getIndex() == SIZE_MAX)
+					{
+						numTilesToShuffle++;
+					}
+				}
+				if (m_score < numTilesToShuffle * 5)
+				{
+					std::cout << "You too broke for that shit :(\n";
+					break;
+				}
+
+				m_score -= numTilesToShuffle * 5;
+
 				for (auto& tile : m_activeTiles)
 				{
 					const auto& tilePtr = tile.get();
