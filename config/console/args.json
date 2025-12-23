@@ -1,0 +1,15 @@
+{
+    "queries": {
+        "--version": "Command version 1.0.0\n",
+        "--help": "powerup-add : add a powerup\n"
+    },
+    "commands": {
+        "card": {
+            "passtype":"explicit",
+            "args":{
+                "-id":"string"
+            }
+        }
+    },
+    "default":"ERROR: Invalid command, please use \"--Help\" for a list of commands"
+}

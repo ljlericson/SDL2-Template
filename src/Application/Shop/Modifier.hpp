@@ -25,7 +25,7 @@ namespace App
 			enum class StaticModifierType
 			{
 				globalPriceReduction,
-				pointsScoreMultiplier,
+				pointsScoredMultiplier,
 				roundStartingPoints
 			};
 		public:

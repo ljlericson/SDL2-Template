@@ -1,4 +1,5 @@
 #include "ChatConsole.h"
+#include "../../Utils/CmdParser/include/ljl/Cmd.hpp"
 
 namespace App
 {
@@ -7,6 +8,8 @@ namespace App
         ChatConsole::ChatConsole()
         {
             m_input.reserve(256);
+            std::ifstream file("./config/console/args.json");
+            file >> m_args;
         }
 
         void ChatConsole::print(const std::string& msg, ImVec4 color)
@@ -15,7 +18,7 @@ namespace App
             m_scrollToBottom = true;
         }
 
-        void ChatConsole::draw()
+        ljl::cmdparser* ChatConsole::draw()
         {
             ImGui::SetNextWindowBgAlpha(0.4f);
 
@@ -52,46 +55,43 @@ namespace App
             {
                 if (!m_input.empty())
                 {
-                    // make input string lowercase
-                    std::transform(m_input.begin(), m_input.end(), m_input.begin(),
-                        [](uint8_t c) { return std::tolower(c); }
-                    );
+                    std::vector<std::string> tokens;
+                    std::stringstream ss(m_input);
+                    std::string token;
 
-                    if (m_input == "exit")
-                    {
-                        exit(0);
-                    }
-                    else if (m_input == "clear")
-                    {
-                        m_messages.clear();
-                    }
-                    else if (m_input == "zsh")
-                    {
-                        print(std::string("Apple Zsh v1.4 ~/"), ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                        m_zsh = true;
-                    }
-                    else if (m_input == "ls ~/desktop/s3dl-3.0/" && m_zsh)
-                    {
-                        print(std::string("build    src    CMakeLists.txt"), ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    }
-                    else if (m_input == "help")
-                    {
-                        print(std::string("Help..."), ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-                    }
-                    else
-                    {
-                        print(std::string("ERROR: Unknown command \"") + m_input + std::string("\""), ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-                    }
+                    while (ss >> token)             // simpler than getline for space-splitting
+                        tokens.push_back(token);
+
+                    // Build argv-style array
+                    std::vector<char*> argv;
+                    argv.reserve(tokens.size());
+
+                    for (auto& s : tokens) 
+                        argv.push_back(s.data());       // C++17+: writable, null-terminated
+
+                    // argc = number of tokens
+                    int argc = static_cast<int>(argv.size());
+
+                    m_cmdParser = new ljl::cmdparser( argc, argv.data(), m_args );
                     m_input.clear();
                 }
-
                 ImGui::SetKeyboardFocusHere(-1);
+            }
+            else
+            {
+                if (m_cmdParser)
+                {
+                    delete m_cmdParser;
+                    m_cmdParser = nullptr;
+                }
             }
 
             ImGui::PopItemWidth();
 
 
             ImGui::End();
+
+            return m_cmdParser;
         }
 
         void ChatConsole::clear()
@@ -116,6 +116,12 @@ namespace App
                 m_messages.begin(),
                 m_messages.end()
             };
+        }
+
+        ChatConsole::~ChatConsole()
+        {
+            if (m_cmdParser)
+                delete m_cmdParser;
         }
 	}
 }

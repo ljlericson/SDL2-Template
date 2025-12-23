@@ -33,9 +33,9 @@ namespace App
 					bonusPoints += bonus.value().get<int>("addScore");
 			}
 
-			if (m_staticModifiers.contains(StaticModifierType::pointsScoreMultiplier))
+			if (m_staticModifiers.contains(StaticModifierType::pointsScoredMultiplier))
 			{
-				bonusPoints += (context.points * m_staticModifiers.at(StaticModifierType::pointsScoreMultiplier)) -
+				bonusPoints += (context.points * m_staticModifiers.at(StaticModifierType::pointsScoredMultiplier)) -
 								context.points;
 			}
 
@@ -55,8 +55,8 @@ namespace App
 		{
 			if (str == "globalPriceReduction")
 				return StaticModifierType::globalPriceReduction;
-			else if (str == "pointsScoreMultiplier")
-				return StaticModifierType::pointsScoreMultiplier;
+			else if (str == "pointsScoredMultiplier")
+				return StaticModifierType::pointsScoredMultiplier;
 			else if (str == "roundStartingPoints")
 				return StaticModifierType::roundStartingPoints;
 			else

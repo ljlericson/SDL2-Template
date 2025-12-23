@@ -1,4 +1,6 @@
 #include "SdlTemplate.hpp"
+#include "../Utils/CmdParser/include/ljl/Cmd.hpp"
+
 
 namespace App
 {
@@ -159,6 +161,21 @@ namespace App
 
 		}
 		ImGui::End();
+
+		if(ljl::cmdparser* cmd = Console::cchat.draw())
+		{
+			auto& cmdr = *cmd;
+			if (cmdr.is(ljl::cmdparser::type::query))
+				cmdr.respond();
+			else if (cmdr.is(ljl::cmdparser::type::command))
+			{
+				if (cmdr["card"])
+				{
+					m_modifierManager->selectOption(cmdr.get_value<std::string>("card", "-id"));
+				}
+			}
+		}
+
 	}
 
 	void Application::ImGuiPostRender()
@@ -226,7 +243,6 @@ namespace App
 			m_playerHand->render(*m_scrabbleBoard, *m_renderer, *m_modifierManager);
 			m_button.render(*m_renderer);
 			this->ImGuiRender();
-			Console::cchat.draw();
 			this->ImGuiPostRender();
 			m_renderer->postRender();
 

@@ -184,8 +184,9 @@ namespace App
 			m_words.clear();
 
 			const size_t N = m_numTiles;
-			int score = 0;
+			int newScore = 0;
 
+			// Build board grid
 			std::vector<char> grid(N * N, '\0');
 			for (const Tile* tile : m_tiles)
 			{
@@ -193,112 +194,100 @@ namespace App
 					grid[tile->getIndex()] = tile->getTileChar();
 			}
 
-			std::unordered_set<size_t> badIndexes; // avoid duplicates
+			std::unordered_set<size_t> badIndexes;
 
-			// horizontal scan
+			auto processWord = [&](const std::string& word,
+				const std::vector<size_t>& indexes)
+				{
+					if (word.length() < 2)
+						return;
+
+					if (!m_spellChecker.spell(word))
+					{
+						badIndexes.insert(indexes.begin(), indexes.end());
+						return;
+					}
+
+					// Valid word
+					if (std::find(m_words.begin(), m_words.end(), word) == m_words.end())
+						m_words.push_back(word);
+
+					if (!m_devMode)
+					{
+						for (char c : word)
+						{
+							std::string key(1, c);
+							newScore += m_letterScores.at(key);
+						}
+					}
+				};
+
+			// --------------------
+			// Horizontal scan
+			// --------------------
 			for (size_t y = 0; y < N; ++y)
 			{
 				std::string word;
-				std::vector<size_t> wordIndexes;
+				std::vector<size_t> indexes;
 
 				for (size_t x = 0; x < N; ++x)
 				{
-					const size_t idx = y * N + x;
-					const char c = grid[idx];
+					size_t idx = y * N + x;
+					char c = grid[idx];
 
 					if (c != '\0')
 					{
 						word.push_back(c);
-						wordIndexes.push_back(idx);
+						indexes.push_back(idx);
 					}
 					else
 					{
-						if (!m_spellChecker.spell(word))
-						{
-							badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
-						}
-						else
-						{
-							for (char c : word)
-							{
-								std::string s;
-								s.push_back(c);
-								score += m_letterScores[s].get<int>();
-							}
-							if (std::find(m_words.begin(), m_words.end(), word) == m_words.end())
-								m_words.push_back(word);
-						}
+						processWord(word, indexes);
 						word.clear();
-						wordIndexes.clear();
+						indexes.clear();
 					}
 				}
 
-				if (!m_spellChecker.spell(word))
-				{
-					badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
-					if (std::find(m_words.begin(), m_words.end(), word) == m_words.end())
-						m_words.push_back(word);
-				}
+				processWord(word, indexes);
 			}
 
-			// vertical scan
+			// --------------------
+			// Vertical scan
+			// --------------------
 			for (size_t x = 0; x < N; ++x)
 			{
 				std::string word;
-				std::vector<size_t> wordIndexes;
+				std::vector<size_t> indexes;
 
 				for (size_t y = 0; y < N; ++y)
 				{
-					const size_t idx = y * N + x;
-					const char c = grid[idx];
+					size_t idx = y * N + x;
+					char c = grid[idx];
 
 					if (c != '\0')
 					{
 						word.push_back(c);
-						wordIndexes.push_back(idx);
+						indexes.push_back(idx);
 					}
 					else
 					{
-						if (!m_spellChecker.spell(word))
-						{
-							badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
-						}
-						else
-						{
-							for (char c : word)
-							{
-								std::string s;
-								s.push_back(c);
-								score += m_letterScores[s].get<int>();
-							}
-							if (std::find(m_words.begin(), m_words.end(), word) == m_words.end())
-								m_words.push_back(word);
-						}
+						processWord(word, indexes);
 						word.clear();
-						wordIndexes.clear();
+						indexes.clear();
 					}
 				}
 
-				if (!m_spellChecker.spell(word))
-				{
-					badIndexes.insert(wordIndexes.begin(), wordIndexes.end());
-					if (std::find(m_words.begin(), m_words.end(), word) == m_words.end())
-						m_words.push_back(word);
-				}
+				processWord(word, indexes);
 			}
 
-			if(!m_devMode)
-			{
-				int mscore = m_score;
-				m_score = score;
-				return { std::vector<size_t>(badIndexes.begin(), badIndexes.end()), score - mscore };
-			}
-			else
-			{
-				int mscore = m_score;
-				m_score = score;
-				return { std::vector<size_t>{}, score - mscore };
-			}
+			// Finalize score
+			int delta = newScore - m_score;
+			m_score = newScore;
+
+			return {
+				std::vector<size_t>(badIndexes.begin(), badIndexes.end()),
+				delta
+			};
 		}
 
 		size_t Board::getSnapTileIndex(glm::vec2 pos)
