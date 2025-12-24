@@ -82,29 +82,25 @@ namespace App
 				{
 					char c;
 					int chance = Utils::getRandomInt(0, 1);
-					auto vowels = m_vowlsAndCons["vowels"].array();
-					auto cons = m_vowlsAndCons["consonants"].array();
 
 					if (chance == 0 && numVowls < m_numTilesPerRound / 5)
 					{
-						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, 4)).get<std::string>()[0];
+						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["vowels"].size() - 1)).get<std::string>()[0];
 						++numVowls;
 					}
 					else
 					{
-						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, 19)).get<std::string>()[0];
-						++numCons;
+						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["consonants"].size() - 1)).get<std::string>()[0];
 					}
 
 					if (chance == 1 && numCons < m_numTilesPerRound - (m_numTilesPerRound / 5))
 					{
-						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, 19)).get<std::string>()[0];
+						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["consonants"].size() - 1)).get<std::string>()[0];
 						++numCons;
 					}
 					else
 					{
-						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, 4)).get<std::string>()[0];
-						++numVowls;
+						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["vowels"].size() - 1)).get<std::string>()[0];
 					}
 
 					m_tiles.push_back(std::make_unique<Tile>(mr_renderer, m_numTiles, c));
