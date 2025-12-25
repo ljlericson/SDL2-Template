@@ -106,10 +106,8 @@ namespace App
 		{
 			if (ImGui::Button("Add 4 word powerup"))
 				m_modifierManager->selectOption("fourLengthWordMultiplyer");
-			if (ImGui::Button("End Round"))
-				m_eventDispatcher.queueEvent(EventType::roundEnd);
-			if (ImGui::Button("Start Round"))
-				m_eventDispatcher.queueEvent(EventType::roundStart);
+			if (ImGui::Button("Confirm Word"))
+				m_eventDispatcher.queueEvent(EventType::wordConfirmed);
 			if (ImGui::Button("End Game"))
 				m_eventDispatcher.queueEvent(EventType::gameEnd);
 			if (ImGui::Button("Start Game"))
@@ -228,7 +226,7 @@ namespace App
 			if (m_button.pressed())
 			{
 				m_eventDispatcher.queueEvent(EventType::gameStart);
-				m_eventDispatcher.queueEvent(EventType::roundStart);
+				m_eventDispatcher.queueEvent(EventType::wordConfirmed);
 				m_button.setButtonText("CRASH");
 			}
 			// custom cullback for imgui

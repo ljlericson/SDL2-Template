@@ -5,14 +5,15 @@ namespace App
 	namespace GameComponents
 	{
 		PlayerHand::PlayerHand(EventSystem::EventDispatcher& eventDispatcher, const Core::SDLBackend::Renderer& renderer, Shop::ModifierManager& modifierManager, size_t numTiles, size_t numTilesPerRound)
-			: m_highlighter(SDL_Color{ .r = 255, .g = 0, .b = 0, .a = 50 }, numTiles),
+			: m_highlighter(SDL_Color{ .r = 255, .g = 0, .b = 0, .a = 100 }, numTiles),
 			  m_numTilesPerRound(numTilesPerRound),
 			  mr_renderer(renderer),
 			  mr_eventDispatcher(eventDispatcher),
 			  mr_modifierManager(modifierManager),
 			  m_numTiles(numTiles),
 			  m_scoreText(glm::vec2(Utils::getWindowSize().first - 75.0f, 0.0f), 32, 32, "./assets/font.ttf", SDL_Color(0, 255, 0, 255), "0"),
-			  m_scoreTextOverall(glm::vec2(Utils::getWindowSize().first - 75.0f, 32), 32, 32, "./assets/font.ttf", SDL_Color(255, 0, 0, 255), "0")
+			  m_scoreTextOverall(glm::vec2(Utils::getWindowSize().first - 75.0f, 32), 32, 32, "./assets/font.ttf", SDL_Color(255, 0, 0, 255), "0"),
+			  m_tileSlots({false, false, false, false, false, false, false})
 
 		{
 			std::ifstream file("./config/tiles/tileLetters.json");
@@ -32,10 +33,10 @@ namespace App
 				{
 					scrabbleBoard.addTileToBoard(tile.get());
 					int score;
-					std::tie(m_badWordIndexes, score) = scrabbleBoard.getBadWordIndexesAndScore();
+					std::tie(m_badWordIndexes, score) = scrabbleBoard.getBadWordIndexesAndScore(mr_modifierManager);
 
 					m_score += score;
-					m_score += mr_modifierManager.getBonusPoints(scrabbleBoard.getWordsOnBoard(), m_score);
+					m_score += mr_modifierManager.getBonusPoints(scrabbleBoard.getWordsOnBoard(), m_score, "wordScored");
 				}
 				else if (result == GameComponents::Tile::PressState::pressed)
 				{
@@ -71,37 +72,25 @@ namespace App
 			// why is this a thing in c++????
 			// like no one gives a shit I missed
 			// the initialisation of two ints
-			int numVowls = 0; 
-			int numCons = 0;
+			size_t nextTileIndex = static_cast<size_t>(m_numRounds) * 7;
+
 			switch (e)
 			{
 			case EventType::gameStart:
-				m_score = 20;
-
 				for (size_t i = 0; i <= m_numTilesPerRound; i++)
 				{
 					char c;
-					int chance = Utils::getRandomInt(0, 1);
+					int chance = Utils::getRandomInt(0, 2);
 
-					if (chance == 0 && numVowls < m_numTilesPerRound / 5)
+					if (chance == 0)
 					{
 						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["vowels"].size() - 1)).get<std::string>()[0];
-						++numVowls;
 					}
 					else
 					{
 						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["consonants"].size() - 1)).get<std::string>()[0];
 					}
-
-					if (chance == 1 && numCons < m_numTilesPerRound - (m_numTilesPerRound / 5))
-					{
-						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["consonants"].size() - 1)).get<std::string>()[0];
-						++numCons;
-					}
-					else
-					{
-						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["vowels"].size() - 1)).get<std::string>()[0];
-					}
+					
 
 					m_tiles.push_back(std::make_unique<Tile>(mr_renderer, m_numTiles, c));
 					mr_eventDispatcher.attach(*m_tiles.back());
@@ -113,15 +102,27 @@ namespace App
 					mr_eventDispatcher.dettach(*tile);
 				}
 
-				m_scoreOverall += m_score;
 				m_score = 0;
-				m_scoreTextOverall.setText(std::to_string(m_scoreOverall));
 				m_activeTiles.clear();
 				m_inactiveTiles.clear();
 				m_tiles.clear();
 				m_badWordIndexes.clear();
 				break;
-			case EventType::roundStart:
+			case EventType::wordConfirmed:
+				m_scoreOverall += m_score;
+				m_scoreTextOverall.setText(std::to_string(m_scoreOverall));
+				m_score = 0;
+
+
+				if (m_badWordIndexes.size() > 0)
+				{
+					Console::ccout << "WORD MUST BE SPELT CORRECTLY" << std::endl;
+					auto [begin, end] = Console::cchat.getMessageIterators();
+					size_t elem = std::distance(begin, end) - 1;
+					Console::Message& mes = Console::cchat.getMessage(elem);
+					mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
+					return;
+				}
 				if (m_inactiveTiles.size() == m_numTilesPerRound)
 				{
 					Console::ccout << "NO MORE TILES" << std::endl;
@@ -131,54 +132,44 @@ namespace App
 					mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
 					break;
 				}
-				else if(m_activeTiles.size() > 0)
-				{
-					Console::ccout << "ROUND ALREADY STARTED\n";
-					auto [begin, end] = Console::cchat.getMessageIterators();
-					size_t elem = std::distance(begin, end) - 1;
-					Console::Message& mes = Console::cchat.getMessage(elem);
-					mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
-					break;
-				}
 
-				Tile::setSidePadding(0);
-				for (size_t i = 0; (i < 7) && (m_activeTiles.size() <= m_numTilesPerRound); i++)
+				for (int i = (int)m_activeTiles.size() - 1; i >= 0; --i)
 				{
-					Tile::incrementSidePadding();
-					m_activeTiles.push_back(m_tiles.at(i + (m_numRounds * 7)));
-					m_activeTiles.at(i).get()->glideToStartPos();
-				}
-				break;
-			case EventType::roundEnd:
-				if (m_badWordIndexes.size() > 0)
-				{
-					Console::ccout << "ALL WORDS MUST BE CORRECTLY SPELLED" << std::endl;
-					auto [begin, end] = Console::cchat.getMessageIterators();
-					size_t elem = std::distance(begin, end) - 1;
-					Console::Message& mes = Console::cchat.getMessage(elem);
-					mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
-					return;
-				}
-				for (auto& tile : m_activeTiles)
-				{
-					const auto& tilePtr = tile.get();
-					if (tilePtr->getIndex() == SIZE_MAX)
+					auto& tile = m_activeTiles[i].get();
+					if (tile->getIndex() != SIZE_MAX)
 					{
-						Console::ccout << "ALL TILES MUST BE USED BEFORE ENDING TURN" << std::endl;
-						auto [begin, end] = Console::cchat.getMessageIterators();
-						size_t elem = std::distance(begin, end) - 1;
-						Console::Message& mes = Console::cchat.getMessage(elem);
-						mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
-						return;
+						m_tileSlots[tile->tileSpotIndex] = false;
+						tile->setInactive();
+						m_inactiveTiles.push_back(tile);
+						m_activeTiles.erase(m_activeTiles.begin() + i);
 					}
 				}
-				for (auto& tile : m_activeTiles)
-				{
-					tile.get()->setInactive();
-					m_inactiveTiles.push_back(tile);
-				}
 
-				m_activeTiles.clear();
+				while (true)
+				{
+					auto slotIt = std::find(m_tileSlots.begin(), m_tileSlots.end(), false);
+					if (slotIt == m_tileSlots.end())
+						break;
+
+					if (m_activeTiles.size() >= m_numTilesPerRound)
+						break;
+
+					if (nextTileIndex >= m_tiles.size())
+						break;
+
+					auto& tile = m_tiles[nextTileIndex++];
+					m_activeTiles.push_back(tile);
+
+					int slotIndex = static_cast<int>(std::distance(m_tileSlots.begin(), slotIt));
+					tile->tileSpotIndex = slotIndex;
+					m_tileSlots[slotIndex] = true;
+
+					glm::vec2& pos = tile->getStartPos();
+					pos.y = static_cast<float>(Utils::getWindowSize().second) - 100;
+					pos.x = static_cast<float>(Utils::getWindowSize().first) - (64.0f + slotIndex * 45.0f);
+
+					tile->glideToStartPos();
+				}
 				m_numRounds++;
 				break;
 			case EventType::shuffleTiles:

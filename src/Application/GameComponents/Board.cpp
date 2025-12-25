@@ -176,7 +176,7 @@ namespace App
 			m_tiles.push_back(tile);
 		}
 
-		std::pair<std::vector<size_t>, int> Board::getBadWordIndexesAndScore()
+		std::pair<std::vector<size_t>, int> Board::getBadWordIndexesAndScore(const Shop::ModifierManager& modifierManager)
 		{
 			if (!m_active)
 				return { {}, 0 };
@@ -216,8 +216,15 @@ namespace App
 					{
 						for (char c : word)
 						{
-							std::string key(1, c);
-							newScore += m_letterScores.at(key);
+							int bonusScore = modifierManager.getBonusPoints(c, 0, "charScored");
+							if (bonusScore == 0)
+							{
+								std::string key(1, c);
+								newScore += m_letterScores.at(key).get<int>();
+							}
+							else
+								newScore += bonusScore;
+							
 						}
 					}
 				};

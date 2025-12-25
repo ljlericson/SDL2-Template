@@ -92,15 +92,26 @@ namespace App
 			}
 		}
 
-		int ModifierManager::getBonusPoints(const std::vector<std::string>& words, int points) const
+		int ModifierManager::getBonusPoints(const std::vector<std::string>& words, int points, const char* event) const
 		{
 			int bonusPoints = 0;
 			for (const auto& [key, modifier] : m_modifiers)
 			{
-				bonusPoints += modifier->getBonusRoundPoints({ .event = "", .words = words, .points = points });
+				bonusPoints += modifier->getBonusRoundPoints({ .event = event, .words = words, .points = points, .ch = ' ' });
 			}
 			return bonusPoints;
 		}
+
+		int ModifierManager::getBonusPoints(char ch, int points, const char* event) const
+		{
+			int bonusPoints = 0;
+			for (const auto& [key, modifier] : m_modifiers)
+			{
+				bonusPoints += modifier->getBonusRoundPoints({ .event = event, .words = {}, .points = points, .ch = ch });
+			}
+			return bonusPoints;
+		}
+
 
 		int ModifierManager::getStaticPriceReduction(int points)
 		{

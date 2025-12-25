@@ -29,7 +29,9 @@ namespace App
 		public:
 			ModifierManager();
 
-			int getBonusPoints(const std::vector<std::string>& words, int points) const;
+			int getBonusPoints(const std::vector<std::string>& words, int points, const char* event) const;
+
+			int getBonusPoints(char ch, int points, const char* event) const;
 
 			int getStaticPriceReduction(int points);
 

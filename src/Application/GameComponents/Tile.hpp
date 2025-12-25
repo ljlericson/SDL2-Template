@@ -39,7 +39,7 @@ namespace App
 
 			PressState handlePress();
 
-			glm::vec2 getStartPos() const;
+			glm::vec2& getStartPos();
 
 			size_t getIndex() const;
 
@@ -51,14 +51,11 @@ namespace App
 
 			void setInactive();
 
-			static void setSidePadding(size_t num);
-
-			static void incrementSidePadding();
-
 			static TTF_Font* getStaticFont();
 
 		public:
 			glm::vec2 pos;
+			int tileSpotIndex = 0;
 		private:
 			std::shared_ptr<Core::SDLBackend::Texture> m_tex;
 			SDL_FRect m_texRect;

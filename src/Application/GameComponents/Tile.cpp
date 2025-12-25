@@ -39,13 +39,6 @@ namespace App
 
 		void Tile::glideToStartPos()
 		{
-			if (m_firstGlide)
-			{
-				m_firstGlide = false;
-				auto [w, h] = Utils::getWindowSize();
-				m_startPos.x = static_cast<float>(w) - m_texRect.w - (sm_numTiles * m_texRect.w);
-				m_startPos.y = static_cast<float>(h) - m_texRect.h - 50.0f;
-			}
 			if (!m_tileActive)
 				return;
 
@@ -156,7 +149,7 @@ namespace App
 			return PressState::notPressed;
 		}
 
-		glm::vec2 Tile::getStartPos() const
+		glm::vec2& Tile::getStartPos()
 		{
 			return m_startPos;
 		}
@@ -184,16 +177,6 @@ namespace App
 		void Tile::setInactive()
 		{
 			m_tileActive = false;
-		}
-
-		void Tile::setSidePadding(size_t num)
-		{
-			sm_numTiles = num;
-		}
-
-		void Tile::incrementSidePadding()
-		{
-			sm_numTiles++;
 		}
 
 		TTF_Font* Tile::getStaticFont()

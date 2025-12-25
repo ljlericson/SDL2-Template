@@ -39,6 +39,7 @@ namespace App
 			std::vector<std::unique_ptr<Tile>> m_tiles;
 			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_activeTiles;
 			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_inactiveTiles;
+			std::array<bool, 7> m_tileSlots;
 			
 
 			GameComponents::TileHighlighter m_highlighter;

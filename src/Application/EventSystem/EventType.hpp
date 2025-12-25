@@ -7,8 +7,7 @@ enum class EventType
 	gameStart,
 	gameEnd,
 	shuffleTiles,
-	roundStart,
-	roundEnd,
+	wordConfirmed,
 
 	enterDevMode
 };

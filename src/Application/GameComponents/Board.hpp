@@ -14,6 +14,7 @@
 #include "BasicGameComponent.hpp"
 #include "Tile.hpp"
 #include "../EventSystem/EventDispatcher.hpp"
+#include "../Shop/ModifierManager.hpp"
 #include "../../Core/SDLBackend/Renderer.hpp"
 #include "../../Core/SDLBackend/Window.hpp"
 #include "../../Core/AssetManager/AssetManager.hpp"
@@ -44,7 +45,7 @@ namespace App
 
 			void addTileToBoard(Tile* tile);
 
-			std::pair<std::vector<size_t>, int> getBadWordIndexesAndScore();
+			std::pair<std::vector<size_t>, int> getBadWordIndexesAndScore(const Shop::ModifierManager& modifierManager);
 
 			size_t getSnapTileIndex(glm::vec2 pos);
 

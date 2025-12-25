@@ -28,6 +28,7 @@ namespace App
 				contextTable["event"] = context.event;
 				contextTable["words"] = sol::as_table(context.words);
 				contextTable["points"] = context.points;
+				contextTable["char"] = context.ch;
 
 				if (auto bonus = m_script->run(contextTable))
 				{

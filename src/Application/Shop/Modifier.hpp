@@ -17,6 +17,7 @@ namespace App
 			const char* event;
 			std::vector<std::string> words;
 			int points;
+			char ch;
 		};
 
 		class Modifier
