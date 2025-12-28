@@ -17,9 +17,9 @@ namespace App
 
 			void render(const Core::SDLBackend::Renderer& renderer);
 
-			bool hide();
+			bool hideAnimation();
 
-			void hideHard();
+			void hide();
 
 		private:
 			std::shared_ptr<Core::SDLBackend::Texture> m_tex;

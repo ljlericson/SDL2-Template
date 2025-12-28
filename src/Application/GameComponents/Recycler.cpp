@@ -35,7 +35,7 @@ namespace App
 			}
 		}
 
-		bool Recycler::hide()
+		bool Recycler::hideAnimation()
 		{
 			if (std::fabs(((m_texRect.y - (m_posShown.y + 500.0f)))) < 1.0f)
 			{
@@ -49,7 +49,7 @@ namespace App
 			}
 		}
 
-		void Recycler::hideHard()
+		void Recycler::hide()
 		{
 			m_texRect.y = m_posShown.y + 500.0f;
 		}

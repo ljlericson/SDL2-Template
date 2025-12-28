@@ -37,11 +37,18 @@ namespace App
 			size_t getNumTilesPerRound() const;
 
 		private:
+			// list of all tiles within the game
 			std::vector<std::unique_ptr<Tile>> m_tiles;
+			// list of active tiles on the board or in the players hand,
+			// events are polled as usual
 			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_activeTiles;
+			// list of inactive tiles that are on the board and do not take
+			// events because their only job is to be rendered;
 			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_inactiveTiles;
+			// free tile slots
 			std::array<bool, 7> m_tileSlots;
 			
+			// tile highlighter for both 
 			GameComponents::TileHighlighter m_highlighter;
 			std::vector<size_t> m_badWordIndexes;
 			std::string m_scoreTextStr;
@@ -53,9 +60,11 @@ namespace App
 			EventSystem::EventDispatcher& mr_eventDispatcher;
 
 			Recycler m_tileRecycler;
-			bool m_hideRecycler = false;
+			bool m_hideRecyclerAnimation = false;
+			
+			bool m_gameRunning = false;
 
-			nlohmann::json m_vowlsAndCons;
+			nlohmann::json m_vowelsAndCons;
 
 			int m_score = 0;
 			size_t m_scoreOverall = 0;
@@ -63,8 +72,11 @@ namespace App
 			
 			bool m_devMode = false;
 
-			// config items
+			// CONFIG ITEMS
+
+			// num tiles total for the entire game
 			size_t m_numTilesTotal = 0;
+			// num tiles lengthwise across the board
 			const size_t m_numTiles = 0;
 		};
 	}

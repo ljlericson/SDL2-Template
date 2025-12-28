@@ -192,6 +192,7 @@ namespace App
 	Application::Application()
 		: mf_ImGuiEventCallback([](SDL_Event* e) { ImGui_ImplSDL3_ProcessEvent(e); })
 	{
+
         if (!SDL_Init(SDL_INIT_EVENTS))
             std::cerr << "SDL events failed to init, error: " << SDL_GetError() << '\n';
 

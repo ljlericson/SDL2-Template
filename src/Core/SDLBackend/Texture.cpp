@@ -16,6 +16,8 @@ namespace Core
             }
 
             texHand = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_SetTextureScaleMode(texHand, SDL_SCALEMODE_NEAREST);
+
             SDL_DestroySurface(surface);
 
             if (!texHand)

@@ -17,23 +17,31 @@ namespace App
 			  m_tileRecycler(renderer)
 
 		{
+			// open file for tile letter selection
 			std::ifstream file("./config/tiles/tileLetters.json");
-			file >> m_vowlsAndCons;
+			file >> m_vowelsAndCons;
 			eventDispatcher.attach(*this);
 		}
 
 		void PlayerHand::render(Board& scrabbleBoard, const Core::SDLBackend::Renderer& renderer)
 		{
-			m_tileRecycler.render(renderer);
+			// only render tile recycler when the game is running
+			if(m_gameRunning)
+				m_tileRecycler.render(renderer);
 
+			// tile render loop
 			for (size_t i = 0; i < m_activeTiles.size(); ++i)
 			{
 				std::unique_ptr<Tile>& tile = m_activeTiles[i].get();
-
 				auto result = tile->handlePress();
 
+				// press hand logic
 				if (result == GameComponents::Tile::PressState::justReleased)
 				{
+					// if the tile is released in the recycler then
+					// shuffle the character and send it back to the
+					// start pos (to give illusion that it is a new
+					// tile)
 					if (m_numTilesTotal > 0 && m_tileRecycler.inRecycler(*tile))
 					{
 						tile->shuffleChar(renderer);
@@ -50,45 +58,51 @@ namespace App
 
 					m_score += score;
 					m_score += mr_modifierManager.getBonusPoints(scrabbleBoard.getWordsOnBoard(), score, "wordScored");
-					m_hideRecycler = true;
+					m_hideRecyclerAnimation = true;
 				}
 				else if (result == GameComponents::Tile::PressState::pressed)
 				{
-					m_hideRecycler = false;
+					m_hideRecyclerAnimation = false;
 
 					if (m_tileRecycler.inRecycler(*tile))
 						tile->addRedTint = true;
 					else
 						tile->addRedTint = false;
 
+					// render the highlighter that shows where the tile
+					// is going to go on the board
 					auto [w, h] = Utils::getWindowSize();
 					const float numTiles = static_cast<float>(scrabbleBoard.getNumTiles());
 					const float tileSize = h / static_cast<float>(numTiles);
 
+					// continuity correction for snapping in the middle of
+					// the tile as opposed to the left top corner
 					size_t tileIndex = scrabbleBoard.getSnapTileIndex({
 						tile->pos.x + ((h / numTiles / 2.0f)),
 						tile->pos.y + ((h / numTiles / 2.0f))
 						});
 
+					// SIZE_MAX indicates the tile is not on the board
 					if (tileIndex != SIZE_MAX)
 						m_highlighter.render(renderer, tileIndex);
-
 				}
-				else if (m_hideRecycler)
+				else if (m_hideRecyclerAnimation)
 				{
-					m_hideRecycler = m_tileRecycler.hide();
+					m_hideRecyclerAnimation = m_tileRecycler.hideAnimation();
 				}
+
 
 				tile->render(renderer);
-			}
-			for (auto& tileReference : m_inactiveTiles)
-			{
-				tileReference.get()->render(renderer);
-			}
-			for (size_t badTileIndes : m_badWordIndexes)
-				m_highlighter.render(renderer, badTileIndes);
+			} // ~ tile render loop
 
+			// inactive tile renderering
+			for (auto& tileReference : m_inactiveTiles) tileReference.get()->render(renderer);
+			// red tint rendering for misspelled words on the board
+			for (size_t badTileIndex : m_badWordIndexes) m_highlighter.render(renderer, badTileIndex);
+			
+			// update the temp score text renderering
 			m_scoreText.setText(std::to_string(m_score));
+
 
 			m_scoreText.render(renderer);
 			m_scoreTextOverall.render(renderer);
@@ -96,35 +110,39 @@ namespace App
 
 		void PlayerHand::onInput(const bool* keyboardState, EventType e, const std::vector<uint32_t>& events)
 		{
-			// why is this a thing in c++????
-			// like no one gives a shit I missed
-			// the initialisation of two ints
+			// local stack variable
 			size_t nextTileIndex = static_cast<size_t>(m_numRounds) * 7;
 
 			switch (e)
 			{
 			case EventType::gameStart:
+				m_gameRunning = true;
+
 				for (size_t i = 0; i < m_numTilesTotal; i++)
 				{
-					m_tileRecycler.hideHard();
+					m_tileRecycler.hide();
 					char c;
 					int chance = Utils::getRandomInt(0, 2);
 
 					if (chance == 0)
 					{
-						c = m_vowlsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["vowels"].size() - 1)).get<std::string>()[0];
+						c = m_vowelsAndCons["vowels"].at(Utils::getRandomInt(0, (int32_t)m_vowelsAndCons["vowels"].size() - 1)).get<std::string>()[0];
 					}
 					else
 					{
-						c = m_vowlsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowlsAndCons["consonants"].size() - 1)).get<std::string>()[0];
+						c = m_vowelsAndCons["consonants"].at(Utils::getRandomInt(0, (int32_t)m_vowelsAndCons["consonants"].size() - 1)).get<std::string>()[0];
 					}
 					
 
 					m_tiles.push_back(std::make_unique<Tile>(mr_renderer, m_numTiles, c));
 					mr_eventDispatcher.attach(*m_tiles.back());
 				}
-				break;
-			case EventType::gameEnd:
+
+				break; // ~ gameStart
+		
+			case EventType::gameEnd: // ----------------
+				m_gameRunning = false;
+
 				for (auto& tile : m_tiles)
 				{
 					mr_eventDispatcher.dettach(*tile);
@@ -140,8 +158,11 @@ namespace App
 				m_inactiveTiles.clear();
 				m_tiles.clear();
 				m_badWordIndexes.clear();
-				break;
-			case EventType::wordConfirmed:
+
+				break; // ~ gameEnd
+
+			case EventType::wordConfirmed: // ----------------
+
 				m_scoreOverall += m_score;
 				m_scoreTextOverall.setText(std::to_string(m_scoreOverall));
 				m_score = 0;
@@ -203,8 +224,10 @@ namespace App
 					tile->glideToStartPos();
 				}
 				m_numRounds++;
-				break;
-			case EventType::shuffleTiles:
+
+				break; // ~ wordConfirmed
+
+			case EventType::shuffleTiles: // ----------------
 				if(!m_devMode)
 				{
 					int numTilesToShuffle = 0;
@@ -237,6 +260,9 @@ namespace App
 						tilePtr->shuffleChar(mr_renderer);
 					}
 				}
+
+				break; // ~shuffleTiles
+
 			case EventType::enterDevMode:
 				m_devMode = true;
 				break;
