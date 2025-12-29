@@ -214,11 +214,12 @@ namespace App
 
 					for (char c : word)
 					{
-						int bonusScore = modifierManager.getBonusPoints(c, 0, "charScored");
+						std::string key(1, c);
+						int charScore = m_letterScores["tileBasePoints"].at(key).get<int>();
+						int bonusScore = modifierManager.getBonusPoints(c, charScore, "charScored");
 						if (bonusScore == 0)
 						{
-							std::string key(1, c);
-							newScore += m_letterScores["tileBasePoints"].at(key).get<int>();
+							newScore += charScore;
 						}
 						else
 							newScore += bonusScore;

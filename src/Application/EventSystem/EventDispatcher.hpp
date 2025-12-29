@@ -36,6 +36,8 @@ namespace App
 			
 			void queueEvent(EventType e);
 
+			bool isEventActive(EventType e);
+
 			void poll(const Core::SDLBackend::Window& window);
 
 		private:

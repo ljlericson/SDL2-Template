@@ -7,6 +7,7 @@ namespace App
 		PlayerHand::PlayerHand(EventSystem::EventDispatcher& eventDispatcher, const Core::SDLBackend::Renderer& renderer, Shop::ModifierManager& modifierManager, int numTiles, int numTilesPerGame)
 			: m_highlighter(SDL_Color{ .r = 255, .g = 0, .b = 0, .a = 100 }, numTiles),
 			  m_numTilesLeft(numTilesPerGame),
+			  m_numTilesTotal(numTilesPerGame),
 			  mr_renderer(renderer),
 			  mr_eventDispatcher(eventDispatcher),
 			  mr_modifierManager(modifierManager),
@@ -35,7 +36,7 @@ namespace App
 				std::unique_ptr<Tile>& tile = m_activeTiles[i].get();
 				auto result = tile->handlePress();
 
-				// press hand logic
+				// press tile logic
 				if (result == GameComponents::Tile::PressState::justReleased)
 				{
 					// if the tile is released in the recycler then
@@ -49,16 +50,23 @@ namespace App
 						tile->pos.x = w + 50.0f;
 						tile->pos.y = h + 50.0f;
 						tile->addRedTint = false;
+						// decrement tiles left and increment next
+						// tile index 
 						--m_numTilesLeft;
+						m_nextTileIndex++;
 					}
 
 					scrabbleBoard.addTileToBoard(tile.get());
 					int score;
 					std::tie(m_badWordIndexes, score) = scrabbleBoard.getBadWordIndexesAndScore(mr_modifierManager);
 
+					const auto& wordsOnBoard = scrabbleBoard.getWordsOnBoard();
+
 					m_score += score;
-					m_score += mr_modifierManager.getBonusPoints(scrabbleBoard.getWordsOnBoard(), score, "wordScored", m_numTilesLeft);
+					m_score += mr_modifierManager.getBonusPoints(wordsOnBoard, score, "wordScored", m_numTilesLeft, static_cast<int>(wordsOnBoard.size()) - m_numPreviousWords);
+
 					m_hideRecyclerAnimation = true;
+					m_numPreviousWords = static_cast<int>(wordsOnBoard.size());
 				}
 				else if (result == GameComponents::Tile::PressState::pressed)
 				{
@@ -110,9 +118,6 @@ namespace App
 
 		void PlayerHand::onInput(const bool* keyboardState, EventType e, const std::vector<uint32_t>& events)
 		{
-			// local stack variable
-			size_t nextTileIndex = static_cast<size_t>(m_numRounds) * 7;
-
 			switch (e)
 			{
 			case EventType::gameStart:
@@ -154,6 +159,8 @@ namespace App
 
 				m_score = 0;
 				m_numRounds = 0;
+				m_numTilesLeft = m_numTilesTotal;
+				m_nextTileIndex = 0;
 				m_activeTiles.clear();
 				m_inactiveTiles.clear();
 				m_tiles.clear();
@@ -198,20 +205,18 @@ namespace App
 					}
 				}
 
-				while (true)
+				while(true)
 				{
 					auto slotIt = std::find(m_tileSlots.begin(), m_tileSlots.end(), false);
-					if (slotIt == m_tileSlots.end())
+					if (slotIt == m_tileSlots.end()) 
 						break;
 
-					if (m_activeTiles.size() >= m_tiles.size())
+					if (m_nextTileIndex > m_tiles.size() - 1) 
 						break;
 
-					if (nextTileIndex >= m_tiles.size())
-						break;
-
-					auto& tile = m_tiles[nextTileIndex++];
+					auto& tile = m_tiles[m_nextTileIndex];
 					m_activeTiles.push_back(tile);
+					++m_nextTileIndex;
 
 					int slotIndex = static_cast<int>(std::distance(m_tileSlots.begin(), slotIt));
 					tile->tileSpotIndex = slotIndex;
@@ -227,42 +232,6 @@ namespace App
 				m_numRounds++;
 
 				break; // ~ wordConfirmed
-
-			case EventType::shuffleTiles: // ----------------
-				if(!m_devMode)
-				{
-					int numTilesToShuffle = 0;
-					for (auto& tile : m_activeTiles)
-					{
-						const auto& tilePtr = tile.get();
-						if (tilePtr->getIndex() == SIZE_MAX)
-						{
-							numTilesToShuffle++;
-						}
-					}
-					if (m_score < numTilesToShuffle * 5)
-					{
-						Console::ccout << "You too broke for that shit :(" << std::endl;
-						auto [begin, end] = Console::cchat.getMessageIterators();
-						size_t elem = std::distance(begin, end) - 1;
-						Console::Message& mes = Console::cchat.getMessage(elem);
-						mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
-						break;
-					}
-
-					m_score -= numTilesToShuffle * 5;
-				}
-
-				for (auto& tile : m_activeTiles)
-				{
-					const auto& tilePtr = tile.get();
-					if (tilePtr->getIndex() == SIZE_MAX)
-					{
-						tilePtr->shuffleChar(mr_renderer);
-					}
-				}
-
-				break; // ~shuffleTiles
 
 			case EventType::enterDevMode:
 				m_devMode = true;

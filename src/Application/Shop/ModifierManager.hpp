@@ -37,11 +37,11 @@ namespace App
 		public:
 			ModifierManager();
 
-			int getBonusPoints(const std::vector<std::string>& words, int points, const char* event, const int numRemainingTiles) const;
+			int getBonusPoints(const std::vector<std::string>& words, int points, const char* event, const int numRemainingTiles, const int wordDelta) const;
 
 			int getBonusPoints(char ch, int points, const char* event) const;
 
-			int getStaticPriceReduction(int points);
+			float getStaticPriceReduction(int points);
 
 			std::vector<std::reference_wrapper<const ModifierInfo>> getShopOptions(size_t num) const;
 

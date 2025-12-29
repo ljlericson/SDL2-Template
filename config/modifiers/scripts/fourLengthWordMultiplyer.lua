@@ -13,15 +13,15 @@ return function(context)
         WordList = wordList
 
         return {
-            addScore = points,
-            mulmultScore = 1,
-            addmultScore = 0
+            addScore = 0,
+            mulMultScore = 1,
+            addMultScore = 0
         }
     else
         return {
             addScore = 0,
-            mulmultScore = 1,
-            addmultScore = 0
+            mulMultScore = 1,
+            addMultScore = 0
         }
     end
 end

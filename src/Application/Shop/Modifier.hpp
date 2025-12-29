@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <expected>
+#include <array>
 
 #include <sol/sol.hpp>
 
@@ -19,6 +20,14 @@ namespace App
 			int points;
 			char ch;
 			const int numRemainingTiles;
+			const int wordDelta;
+		};
+
+		struct PointsReturn
+		{
+			int addScore = 0;
+			float addMult = 0;
+			float mulMult = 0;
 		};
 
 		class Modifier
@@ -27,27 +36,24 @@ namespace App
 			enum class StaticModifierType
 			{
 				globalPriceReduction,
-				pointsScoredMultiplier,
-				roundStartingPoints
+				pointsScoredMultiplier
 			};
 		public:
-			Modifier(const std::unordered_map<StaticModifierType, int>& staticModifiers,
+			Modifier(const std::unordered_map<StaticModifierType, float>& staticModifiers,
 					 bool stackable,
 				     std::unique_ptr<LuaScripting::Script> script = nullptr);
 			
-			int getBonusRoundPoints(const Context& context) const;
+			PointsReturn getBonusRoundPoints(const Context& context);
 
-			int getStaticStartPointsBonus() const;
-
-			int getStaticPriceReduction() const;
+			float getStaticPriceReduction() const;
 
 			static auto stringToStaticModifier(const std::string& str) -> std::expected<StaticModifierType, std::string>;
 
 		private:
 			std::unique_ptr<LuaScripting::Script> m_script;
-			mutable std::vector<std::string> m_words;
+			mutable size_t m_numPreviousWords = 0;
 			// config items
-			std::unordered_map<StaticModifierType, int> m_staticModifiers;
+			std::unordered_map<StaticModifierType, float> m_staticModifiers;
 			bool m_stackable = false;
 		};
 	}

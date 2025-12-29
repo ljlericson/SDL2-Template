@@ -55,6 +55,11 @@ namespace App
 			m_eventQueue.push_back(e);
 		}
 
+		bool EventDispatcher::isEventActive(EventType e)
+		{
+			return m_eventQueue.empty() ? false : m_eventQueue.front() == e;
+		}
+
 		void EventDispatcher::poll(const Core::SDLBackend::Window& window)
 		{
 			SDL_PumpEvents();

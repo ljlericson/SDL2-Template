@@ -8,7 +8,6 @@ enum class EventType
 	gameEnd,
 	wordConfirmed,
 
-	shuffleTiles,
 	screenShake,
 
 	enterDevMode

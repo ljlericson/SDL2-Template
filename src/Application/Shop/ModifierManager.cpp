@@ -15,7 +15,24 @@ namespace App
 				{
 					ModifierInfo newModifierInfo;
 					std::ifstream file(entry.path());
-					file >> newModifierInfo.json;
+
+					bool notSuccess = false;
+					try
+					{
+						file >> newModifierInfo.json;
+					}
+					catch (const nlohmann::json::exception& e)
+					{
+						Console::ccout << "[config/modifiers/config JSON ERROR]:\n[FILE]: " << std::string(path) << "\n[JSON ERROR]: " << e.what() << "\nMODIFIER SKIPPED" << std::endl;
+						auto [begin, end] = Console::cchat.getMessageIterators();
+						size_t elem = std::distance(begin, end) - 1;
+						Console::Message& mes = Console::cchat.getMessage(elem);
+						mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
+						notSuccess = true;
+					}
+
+					if (notSuccess)
+						continue;
 
 					if (newModifierInfo.json.contains("id"))
 						newModifierInfo.id = newModifierInfo.json["id"].get<std::string>();
@@ -93,33 +110,49 @@ namespace App
 			}
 		}
 
-		int ModifierManager::getBonusPoints(const std::vector<std::string>& words, int points, const char* event, const int numRemainingTiles) const
+		int ModifierManager::getBonusPoints(const std::vector<std::string>& words, int points, const char* event, const int numRemainingTiles, const int wordDelta) const
 		{
-			int bonusPoints = 0;
+			int add = 0;
+			float addMult = 0;
+			float mulMult = 1;
+
 			for (const auto& [key, modifier] : m_modifiers)
 			{
-				bonusPoints += modifier->getBonusRoundPoints({ .event = event, .words = words, .points = points, .ch = ' ', .numRemainingTiles = numRemainingTiles});
+				auto bonusPoints = modifier->getBonusRoundPoints({ .event = event, .words = words, .points = points, .ch = ' ', .numRemainingTiles = numRemainingTiles, .wordDelta = wordDelta });
+				add += bonusPoints.addScore;
+				addMult += bonusPoints.addMult;
+				mulMult += bonusPoints.mulMult;
 			}
-			return bonusPoints;
+
+			float result = (points + add) * (1.0f + addMult) * mulMult;
+			return static_cast<int>(std::round(result - points));
 		}
 
 		int ModifierManager::getBonusPoints(char ch, int points, const char* event) const
 		{
-			int bonusPoints = 0;
+			int add = 0;
+			float addMult = 0;
+			float mulMult = 1;
+
 			for (const auto& [key, modifier] : m_modifiers)
 			{
-				bonusPoints += modifier->getBonusRoundPoints({ .event = event, .words = {}, .points = points, .ch = ch });
+				auto bonusPoints = modifier->getBonusRoundPoints({ .event = event, .words = {}, .points = points, .ch = ch });
+				add += bonusPoints.addScore;
+				addMult += bonusPoints.addMult;
+				mulMult += bonusPoints.mulMult;
 			}
-			return bonusPoints;
+
+			float result = (points + add) * (1.0f + addMult) * mulMult;
+			return static_cast<int>(std::round(result - points));
 		}
 
 
-		int ModifierManager::getStaticPriceReduction(int points)
+		float ModifierManager::getStaticPriceReduction(int points)
 		{
-			int reduced = 0;
+			float reduced = 0;
 			for (const auto& [key, modifier] : m_modifiers)
 			{
-				reduced -= (points - (points * modifier->getStaticPriceReduction()));
+				reduced -= (static_cast<float>(points) - (points * modifier->getStaticPriceReduction()));
 			}
 			return reduced;
 		}
@@ -164,7 +197,7 @@ namespace App
 				bool hasScript = false;
 				if (!modifierInfo.json.contains("script"))
 				{
-					Console::ccout << "[config/modifiers/config ERROR] No script field specified. Did you mean \"script\": false? (ID): " << id << std::endl;
+					Console::ccout << "[config/modifiers/config ERROR] No script field specified. Did you mean \"script\": \"<NO-SCRIPT>\"? (ID): " << id << std::endl;
 					auto [begin, end] = Console::cchat.getMessageIterators();
 					size_t elem = std::distance(begin, end) - 1;
 					Console::Message& mes = Console::cchat.getMessage(elem);
@@ -173,7 +206,7 @@ namespace App
 				else
 					hasScript = (modifierInfo.json["script"].get<std::string>() != "<NO-SCRIPT>");
 
-				std::unordered_map<Modifier::StaticModifierType, int> staticModifierInfo;
+				std::unordered_map<Modifier::StaticModifierType, float> staticModifierInfo;
 				if (!modifierInfo.json.contains("staticModifiers"))
 				{
 					Console::ccout << "[config/modifiers/config ERROR] No staticModifiers field specified, staticModifiers field is REQUIRED (ID): " << id << std::endl;
@@ -192,16 +225,17 @@ namespace App
 						{
 							staticModifierInfo.insert(std::pair{
 								result.value(),
-								val.get<int>()
+								val.get<float>()
 								});
 						}
 						else
 						{
-							Console::ccout << "[config/modifiers/config ERROR] Invalid modifier: " << result.error() << " (ID) : " << id << std::endl;
+							Console::ccout << "[config/modifiers/config ERROR] Invalid staticModifier: " << result.error() << " (ID) : " << id << std::endl;
 							auto [begin, end] = Console::cchat.getMessageIterators();
 							size_t elem = std::distance(begin, end) - 1;
 							Console::Message& mes = Console::cchat.getMessage(elem);
 							mes.color = ImVec4(255.0f, 0.0f, 0.0f, 255.0f);
+							return;
 						}
 					}
 				}
@@ -222,7 +256,10 @@ namespace App
 				});
 
 				if (m_modifierInfo.at(id).stackable)
+				{
+					m_indexToID.erase(std::find(m_indexToID.begin(), m_indexToID.end(), id));
 					m_modifierInfo.erase(id);
+				}
 			}
 			else
 			{

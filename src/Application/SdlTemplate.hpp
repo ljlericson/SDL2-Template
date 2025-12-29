@@ -37,7 +37,15 @@ namespace App
 		~Application();
 
 	private:
-		void ImGuiRender();
+		enum class Layer
+		{
+			Start,
+			Game
+		};
+	private:
+		void ImGuiPreRender();
+		void ImGuiRenderGameUI();
+		void ImGuiRenderStartUI();
 		void ImGuiPostRender();
 		void ImGuiTheme();
 	private:
@@ -51,9 +59,12 @@ namespace App
 		UIComponents::Button m_button;
 
 		std::shared_ptr<Core::SDLBackend::Texture> m_backgroundTex;
+		std::shared_ptr<Core::SDLBackend::Texture> m_menuTex;
 
 		std::function<void(SDL_Event* e)> mf_ImGuiEventCallback;
 		EventSystem::EventDispatcher m_eventDispatcher;
+
+		Layer m_layer;
 
 		bool m_fullscreen = false;
 		bool m_devMode = false;

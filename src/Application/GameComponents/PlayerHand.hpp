@@ -69,15 +69,17 @@ namespace App
 			int m_score = 0;
 			size_t m_scoreOverall = 0;
 			uint8_t m_numRounds = 0;
+			int m_nextTileIndex = 0;
+			int m_numPreviousWords = 0;
 			
 			bool m_devMode = false;
-
-			// CONFIG ITEMS
 
 			// num tiles total for the entire game
 			int m_numTilesLeft = 0;
 			// num tiles lengthwise across the board
 			const int m_numTiles = 0;
+			// num tiles across the entire game
+			const int m_numTilesTotal;
 		};
 	}
 }

@@ -4,7 +4,7 @@ namespace App
 {
 	namespace Shop
 	{
-		Modifier::Modifier(const std::unordered_map<StaticModifierType, int>& staticModifiers,
+		Modifier::Modifier(const std::unordered_map<StaticModifierType, float>& staticModifiers,
 						bool stackable,
 						std::unique_ptr<LuaScripting::Script> script)
 			: m_staticModifiers(staticModifiers),
@@ -16,9 +16,9 @@ namespace App
 				m_script = nullptr;
 		}
 
-		int Modifier::getBonusRoundPoints(const Context& context) const
+		PointsReturn Modifier::getBonusRoundPoints(const Context& context)
 		{
-			int bonusPoints = 0;
+			PointsReturn points;
 
 			if (m_script)
 			{
@@ -30,34 +30,27 @@ namespace App
 				contextTable["points"] = context.points;
 				contextTable["char"] = context.ch;
 				contextTable["numRemainingTiles"] = context.numRemainingTiles;
+				contextTable["wordDelta"] = context.wordDelta;
 
+				
 				if (auto bonus = m_script->run(contextTable))
 				{
-					bonusPoints += bonus.value().get<int>("addScore");
+					points.addScore += bonus.value().get<int>("addScore");
+					points.addMult += bonus.value().get<float>("addMultScore");
+					points.mulMult += bonus.value().get<float>("mulMultScore");
 				}
 
 			}
 
-			if (m_staticModifiers.contains(StaticModifierType::pointsScoredMultiplier) && context.ch == ' ')
+			if (m_staticModifiers.contains(StaticModifierType::pointsScoredMultiplier) && context.ch != ' ')
 			{
-				bonusPoints += ((context.points * m_staticModifiers.at(StaticModifierType::pointsScoredMultiplier)) -
-								context.points) * static_cast<int>(context.words.size() - m_words.size());
-				m_words = context.words;
+				points.addMult += m_staticModifiers.at(StaticModifierType::pointsScoredMultiplier);
 			}
 
-			return bonusPoints;
+			return points;
 		}
 
-		int Modifier::getStaticStartPointsBonus() const
-		{
-			if (m_staticModifiers.contains(StaticModifierType::roundStartingPoints))
-			{
-				return m_staticModifiers.at(StaticModifierType::roundStartingPoints);
-			}
-			return 0;
-		}
-
-		int Modifier::getStaticPriceReduction() const
+		float Modifier::getStaticPriceReduction() const
 		{
 			if (m_staticModifiers.contains(StaticModifierType::globalPriceReduction))
 			{
@@ -72,10 +65,8 @@ namespace App
 				return StaticModifierType::globalPriceReduction;
 			else if (str == "pointsScoredMultiplier")
 				return StaticModifierType::pointsScoredMultiplier;
-			else if (str == "roundStartingPoints")
-				return StaticModifierType::roundStartingPoints;
 			else
-				return std::unexpected("No enum found for string");
+				return std::unexpected(std::string("No enum found for string \"") + str + std::string("\""));
 		}
 	}
 }
