@@ -6,7 +6,7 @@
 
 #include "../../Core/AssetManager/AssetManager.hpp"
 #include "../../Core/SDLBackend/Renderer.hpp"
-#include "../../Core/SDLBackend/Texture.hpp"
+#include "../../Core/SDLBackend/SpriteSheet.hpp"
 #include "../../Core/SDLBackend/Text.hpp"
 #include "../EventSystem/BasicEventObserver.hpp"
 
@@ -29,7 +29,7 @@ namespace App
 			bool pressed() const;
 			
 		private:
-			std::shared_ptr<Core::SDLBackend::Texture> m_tex;
+			Core::SDLBackend::SpriteSheet m_tex;
 			Core::SDLBackend::Text m_text;
 			SDL_FRect m_texRect;
 			SDL_FRect m_texSrcRect;

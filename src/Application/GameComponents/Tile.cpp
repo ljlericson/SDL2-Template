@@ -8,7 +8,7 @@ namespace App
 			: m_startPos(0.0f), m_numTilesLengthWase(numTiles), m_char(tileChar)
 		{
 			if (!sm_font)
-				sm_font = TTF_OpenFont("./assets/font.ttf", 128);
+				sm_font = TTF_OpenFont("./assets/Fonts/font.ttf", 128);
 
 			m_tex = Core::AssetManager::textureManager->newTexture(
 				"Tile",

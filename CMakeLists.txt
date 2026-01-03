@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.30)
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
     CACHE STRING "Vcpkg toolchain file")
 
-project(sdltemplate VERSION 1.0)
+project(ScrabbleRougeLike VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -33,30 +33,30 @@ find_library(HUNSPELL_LIBRARY
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF) 
 
 # --- Executable ---
-add_executable(sdltemplate)
+add_executable(ScrabbleRougeLike)
 
 # Sources
-file(GLOB_RECURSE sdltemplate_SOURCES CONFIGURE_DEPENDS 
+file(GLOB_RECURSE ScrabbleRougeLike_SOURCES CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inl"
 )
-target_sources(sdltemplate PRIVATE ${sdltemplate_SOURCES})
+target_sources(ScrabbleRougeLike PRIVATE ${ScrabbleRougeLike_SOURCES})
 #if(MSVC)
-#    target_sources(sdltemplate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/icon.rc)
+#    target_sources(ScrabbleRougeLike PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/icon.rc)
 #elseif(MINGW)
 #    enable_language(RC)
-#    target_sources(sdltemplate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/icon.rc)
+#    target_sources(ScrabbleRougeLike PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/icon.rc)
 #endif()
 
 # Includes
-target_include_directories(sdltemplate PRIVATE
+target_include_directories(ScrabbleRougeLike PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 	${HUNSPELL_INCLUDE_DIR}
 )
 
-target_link_libraries(sdltemplate PRIVATE
+target_link_libraries(ScrabbleRougeLike PRIVATE
 	imgui::imgui
 	OpenAL::OpenAL
 	glm::glm
@@ -70,14 +70,14 @@ target_link_libraries(sdltemplate PRIVATE
 )
 # --- Compiler warnings ---
 if(MSVC)
-    target_compile_options(sdltemplate PRIVATE
+    target_compile_options(ScrabbleRougeLike PRIVATE
         /W3
         /MP
         /WX
         /ZI
     )
 else()
-    target_compile_options(sdltemplate PRIVATE 
+    target_compile_options(ScrabbleRougeLike PRIVATE 
         -Wall 
         -Wextra 
         -Wpedantic
@@ -85,9 +85,9 @@ else()
 endif()
 
 # --- Visual Studio niceties ---
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT sdltemplate)
-set_target_properties(sdltemplate PROPERTIES
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ScrabbleRougeLike)
+set_target_properties(ScrabbleRougeLike PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
 )
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${sdltemplate_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${ScrabbleRougeLike_SOURCES})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

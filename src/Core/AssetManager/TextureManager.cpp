@@ -7,7 +7,7 @@ namespace Core
 	{
 		std::shared_ptr<SDLBackend::Texture> TextureManager::newTexture(const std::string& key, SDL_Renderer* renderer, const std::string& fpath)
 		{
-			if (!mrp_renderer)
+			if (!mrp_renderer && renderer)
 				mrp_renderer = renderer;
 
 			// avoid texture creation if texture exists
@@ -31,7 +31,7 @@ namespace Core
 
 		std::shared_ptr<SDLBackend::Texture> TextureManager::newTexture(const std::string& key, SDL_Renderer* renderer, SDL_Texture* texture)
 		{
-			if (!mrp_renderer)
+			if (!mrp_renderer && renderer)
 				mrp_renderer = renderer;
 
 			// avoid texture creation if texture exists
@@ -122,7 +122,7 @@ namespace Core
 		std::shared_ptr<SDLBackend::Texture> TextureManager::getInvalidTex()
 		{
 			if (!m_invalidTex)
-				m_invalidTex = std::make_shared<SDLBackend::Texture>(mrp_renderer, "./assets/textures/no_texture.png");
+				m_invalidTex = std::make_shared<SDLBackend::Texture>(mrp_renderer, "./assets/Textures/LoadingError.png");
 
 			return m_invalidTex;
 		}

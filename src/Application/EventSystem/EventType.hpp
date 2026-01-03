@@ -4,11 +4,13 @@ enum class EventType
 {
 	noEvent,
 
-	gameStart,
-	gameEnd,
+	roundStart,
+	roundEnd,
 	wordConfirmed,
 
 	screenShake,
 
-	enterDevMode
+	enterDevMode,
+
+	gameEnd
 };

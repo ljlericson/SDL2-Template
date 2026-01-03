@@ -6,7 +6,7 @@ namespace App
 	{
 		Recycler::Recycler(const Core::SDLBackend::Renderer& renderer)
 		{
-			m_tex = Core::AssetManager::textureManager->newTexture("RECYCLER", renderer.getRendHand(), "./assets/textures/recycler.png");
+			m_tex = Core::AssetManager::textureManager->newTexture("RECYCLER", renderer.getRendHand(), "./assets/Textures/GameComponents/Recycler.png");
 			m_texRect.h = 100.0f;
 			m_texRect.w = 500.0f;
 			m_texRect.y = static_cast<float>(Utils::getWindowSize().second) - 100.0f;

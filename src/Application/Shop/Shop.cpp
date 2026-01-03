@@ -50,5 +50,26 @@ namespace App
 				m_modifierInfo.clear();
 			ImGui::End();
 		}
+
+		void Shop::onInput(const bool* keyboardState, EventType e, const std::vector<uint32_t>& events)
+		{
+			switch (e)
+			{
+			case EventType::roundStart:
+				break;
+			case EventType::roundEnd:
+				break;
+			case EventType::wordConfirmed:
+				break;
+			case EventType::screenShake:
+				break;
+			case EventType::enterDevMode:
+				break;
+			case EventType::gameEnd:
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }

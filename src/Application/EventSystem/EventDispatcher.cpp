@@ -1,7 +1,7 @@
 #include "EventDispatcher.hpp"
 #include "../GameComponents/Board.hpp"
 #include "../GameComponents/Tile.hpp"
-#include "../GameComponents/PlayerHand.hpp"
+#include "../GameComponents/GameplayManager.hpp"
 #include "../UIComponents/Button.hpp"
 
 namespace App
@@ -88,8 +88,8 @@ namespace App
 	template void EventSystem::EventDispatcher::attach<App::GameComponents::Tile>(App::GameComponents::Tile&);
 	template void EventSystem::EventDispatcher::dettach<App::GameComponents::Tile>(App::GameComponents::Tile&);
 
-	template void EventSystem::EventDispatcher::attach<App::GameComponents::PlayerHand>(App::GameComponents::PlayerHand&);
-	template void EventSystem::EventDispatcher::dettach<App::GameComponents::PlayerHand>(App::GameComponents::PlayerHand&);
+	template void EventSystem::EventDispatcher::attach<App::GameComponents::GameplayManager>(App::GameComponents::GameplayManager&);
+	template void EventSystem::EventDispatcher::dettach<App::GameComponents::GameplayManager>(App::GameComponents::GameplayManager&);
 
 	template void EventSystem::EventDispatcher::attach<App::UIComponents::Button>(App::UIComponents::Button&);
 	template void EventSystem::EventDispatcher::dettach<App::UIComponents::Button>(App::UIComponents::Button&);

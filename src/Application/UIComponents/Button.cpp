@@ -21,19 +21,21 @@ namespace App
 		*/
 
 		Button::Button(const Core::SDLBackend::Renderer& renderer, SDL_FRect rect, const char* title)
-			: m_tex(Core::AssetManager::textureManager->newTexture("BUTTON", renderer.getRendHand(), "./assets/textures/button.png")),
+			: m_tex(renderer.getRendHand(), "./assets/Textures/UIComponents/Button.png", 111, 52, 1, 2),
 			m_texRect(rect)
 		{
 			m_texSrcRect.h = 104.0f;
 			m_texSrcRect.w = 111.0f;
 			m_texSrcRect.x = 0;
 			m_texSrcRect.y = 0;
+
+			m_tex.pos = glm::vec2{ m_texRect.x, m_texRect.y };
 			
 			m_text = Core::SDLBackend::Text(
 				glm::vec2{ m_texSrcRect.x, m_texSrcRect.y }, 
 				m_texSrcRect.w, 
 				m_texSrcRect.h, 
-				"./assets/font.ttf",
+				"./assets/Fonts/font.ttf",
 				SDL_Color(255, 0, 0, 255), 
 				title
 			);
@@ -42,11 +44,11 @@ namespace App
 		void Button::render(const Core::SDLBackend::Renderer& renderer) 
 		{
 			if (m_pressed)
-				m_texSrcRect = { 0, 0, 111.0f, 104.0f / 2 };
+				m_tex.setFrame(0);
 			else
-				m_texSrcRect = { 0, 104.0f / 2, 111.0f, 104.0f / 2 };
+				m_tex.setFrame(1);
 
-			renderer.render(*m_tex, m_texRect, &m_texSrcRect);
+			m_tex.render(renderer);
 			m_text.getRectToSetPosManually() = SDL_FRect{ .x = m_texRect.x + ((m_texRect.w - m_texRect.w * 0.9f) / 2.0f), 
 												   .y = m_texRect.y + (m_texRect.h / 4) + (m_pressed ? 2.0f : 0.0f),
 												   .w = m_texRect.w * 0.9f, 

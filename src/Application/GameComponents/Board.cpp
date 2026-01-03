@@ -5,9 +5,9 @@ namespace App
 	namespace GameComponents
 	{
 		Board::Board(const Core::SDLBackend::Renderer& renderer, const Core::SDLBackend::Window& window)
-			: m_spellChecker("./assets/dictionaries/en_AU.aff", "./assets/dictionaries/en_AU.dic")
+			: m_spellChecker("./assets/Dictionaries/en_AU.aff", "./assets/Dictionaries/en_AU.dic")
 		{
-			m_tex = Core::AssetManager::textureManager->newTexture("Board", renderer.getRendHand(), "./assets/textures/board.png");
+			m_tex = Core::AssetManager::textureManager->newTexture("Board", renderer.getRendHand(), "./assets/Textures/GameComponents/Board.png");
 			auto [w, h] = Utils::getWindowSize();
 
 			m_texRectShaking.h = static_cast<float>(h);
@@ -51,11 +51,11 @@ namespace App
 				m_texRectShaking.x += Utils::getRandomInt(0, 10);
 				m_texRectShaking.y += Utils::getRandomInt(0, 10);
 				break;
-			case EventType::gameStart:
+			case EventType::roundStart:
 				m_texRect.x = 0;
 				m_active = true;
 				break;
-			case EventType::gameEnd:
+			case EventType::roundEnd:
 				m_active = false;
 				m_tiles.clear();
 				break;
