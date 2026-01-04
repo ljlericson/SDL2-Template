@@ -1,0 +1,25 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "msvc",
+      "displayName": "MSVC (Visual Studio 2026)",
+      "generator": "Visual Studio 18 2026",
+      "binaryDir": "${sourceDir}/build-msvc",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "mingw",
+      "displayName": "MinGW (UCRT64)",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build-mingw",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
+      }
+    }
+  ]
+}
