@@ -4,6 +4,7 @@
 *.obj
 *.o
 *.log
+.DS_Store
 
 # ImGui config
 imgui.ini
@@ -16,6 +17,7 @@ imgui.ini
 # vs build
 build-msvc/
 build-mingw/
+build/
 
 diagnostics/
 

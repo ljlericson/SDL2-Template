@@ -195,8 +195,11 @@ namespace App
 				m_badWordIndexes.clear();
 
 				if(m_score < m_targetScore)
+                {
 					mr_eventDispatcher.queueEvent(EventType::gameEnd);
-
+                    mr_eventDispatcher.queueEvent(EventType::transferToEndState);
+                }
+                
 				m_score = 0;
 				m_numRounds = 0;
 				m_numTilesLeft = m_numTilesTotal;
@@ -267,6 +270,9 @@ namespace App
 					tile->glideToStartPos();
 					--m_numTilesLeft;
 				}
+
+                if(m_numTilesLeft == 0 && m_activeTiles.size() == 0)
+                    mr_eventDispatcher.queueEvent(EventType::roundEnd);
 				m_numRounds++;
 
 				break; // ~ wordConfirmed
