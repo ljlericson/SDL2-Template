@@ -1,0 +1,11 @@
+{
+    "id":"letterZMultiplier",
+    "description":"Gives bonus points for every tile with Z on the board",
+    "cost": 50,
+    "stackable": true,
+    "rarity": 2,
+    "script":"./config/modifiers/scripts/letterZMultiplier.lua",
+    "staticModifiers": {
+
+    }
+}

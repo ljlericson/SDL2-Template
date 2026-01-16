@@ -1,15 +1,15 @@
 return function(context)
     if context.event == "charScored" then
-        local points = 0
+        local addMult = 0
 
         if context.char == "K" then
-            points = 100
+            addMult = addMult + 1
         end
 
         return {
-            addScore = points,
+            addScore = 0,
             mulmultScore = 1,
-            addmultScore = 0
+            addmultScore = addMult
         }
     else
         return {

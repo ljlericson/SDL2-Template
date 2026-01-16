@@ -1,0 +1,11 @@
+{
+    "id":"fourLengthWordMultiplier",
+    "description":"Gives bonus points for every four letter word made",
+    "cost": 100,
+    "stackable": true,
+    "rarity": 2,
+    "script":"./config/modifiers/scripts/fiveLengthWordBonus.lua",
+    "staticModifiers": {
+        
+    }
+}
