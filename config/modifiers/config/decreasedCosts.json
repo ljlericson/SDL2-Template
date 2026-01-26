@@ -4,6 +4,8 @@
     "cost": 50,
     "stackable": false,
     "rarity": 1,
+		"spriteSheet": "<DEFAULT>",
+		"spriteSheetFrame": 0,
     "script":"<NO-SCRIPT>",
     "staticModifiers": {
         "globalPriceReduction": 0.8

@@ -1,98 +1,102 @@
 #pragma once
-#include <vector>
-#include <iostream>
-#include <memory>
-#include <functional>
-#include <fstream>
 #include <algorithm>
 #include <array>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
-#include "BasicGameComponent.hpp"
-#include "Tile.hpp"
-#include "Recycler.hpp"
-#include "Board.hpp"
-#include "TileHighlighter.hpp"
-#include "../Shop/ModifierManager.hpp"
-#include "../EventSystem/EventDispatcher.hpp"
 #include "../../Core/SDLBackend/Renderer.hpp"
 #include "../../Core/SDLBackend/Text.hpp"
 #include "../Console/ChatStream.h"
-
+#include "../EventSystem/EventDispatcher.hpp"
+#include "../Shop/ModifierManager.hpp"
+#include "BasicGameComponent.hpp"
+#include "Board.hpp"
+#include "Recycler.hpp"
+#include "Tile.hpp"
+#include "TileHighlighter.hpp"
 
 namespace App
 {
-	namespace GameComponents
-	{
-		class GameplayManager : public BasicGameComponent
-		{
-		public:
-			// updating game system on render means
-			// only one for loop needed going over
-			// tiles
-			enum class UpdateGameSystemOnRender
-			{
-				true_,
-				false_
-			};
-		public:
-			GameplayManager(EventSystem::EventDispatcher& eventDispatcher, const Core::SDLBackend::Renderer& renderer, Shop::ModifierManager& modifierManager, Board& board, int numTiles, int numTilesPerGame);
-			~GameplayManager();
+namespace GameComponents
+{
+class GameplayManager : public BasicGameComponent
+{
+  public:
+    // updating game system on render means
+    // only one for loop needed going over
+    // tiles
+    enum class UpdateGameSystemOnRender
+    {
+        true_,
+        false_
+    };
 
-			void render(const Core::SDLBackend::Renderer& renderer, UpdateGameSystemOnRender renderType);
+  public:
+    GameplayManager(EventSystem::EventDispatcher& eventDispatcher,
+                    const Core::SDLBackend::Renderer& renderer,
+                    Shop::ModifierManager& modifierManager, Board& board, int numTiles,
+                    int numTilesPerGame);
+    ~GameplayManager();
 
-			void onInput(const bool* keyboardState, EventType e, const std::vector<uint32_t>& events) override;
+    void render(const Core::SDLBackend::Renderer& renderer, UpdateGameSystemOnRender renderType);
 
-			int getNumTilesLeft() const;
+    void onInput(const bool* keyboardState, EventType e,
+                 const std::vector<uint32_t>& events) override;
 
-		private:
-			// list of all tiles within the game
-			std::vector<std::unique_ptr<Tile>> m_tiles;
-			// list of active tiles on the board or in the players hand,
-			// events are polled as usual
-			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_activeTiles;
-			// list of inactive tiles that are on the board and do not take
-			// events because their only job is to be rendered;
-			std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_inactiveTiles;
-			// free tile slots
-			std::array<bool, 7> m_tileSlots;
-			
-			// tile highlighter for both 
-			GameComponents::TileHighlighter m_highlighter;
-			std::vector<size_t> m_badWordIndexes;
-			Core::SDLBackend::Text m_scoreText;
-			Core::SDLBackend::Text m_tilesLeftText;
-			Core::SDLBackend::Text m_targetScoreText;
+    int getNumTilesLeft() const;
 
-			Board& mr_board;
-			Shop::ModifierManager& mr_modifierManager;
-			const Core::SDLBackend::Renderer& mr_renderer;
-			EventSystem::EventDispatcher& mr_eventDispatcher;
+  private:
+    // list of all tiles within the game
+    std::vector<std::unique_ptr<Tile>> m_tiles;
+    // list of active tiles on the board or in the players hand,
+    // events are polled as usual
+    std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_activeTiles;
+    // list of inactive tiles that are on the board and do not take
+    // events because their only job is to be rendered;
+    std::vector<std::reference_wrapper<std::unique_ptr<Tile>>> m_inactiveTiles;
+    // free tile slots
+    std::array<bool, 7> m_tileSlots;
 
-			Recycler m_tileRecycler;
-			bool m_hideRecyclerAnimation = false;
-			
-			bool m_gameRunning = false;
+    // tile highlighter for both
+    GameComponents::TileHighlighter m_highlighter;
+    std::vector<size_t> m_badWordIndexes;
+    Core::SDLBackend::Text m_scoreText;
+    Core::SDLBackend::Text m_tilesLeftText;
+    Core::SDLBackend::Text m_targetScoreText;
 
-			nlohmann::json mj_vowelsAndCons;
+    Board& mr_board;
+    Shop::ModifierManager& mr_modifierManager;
+    const Core::SDLBackend::Renderer& mr_renderer;
+    EventSystem::EventDispatcher& mr_eventDispatcher;
 
-			int m_score = 0;
-			uint8_t m_numRounds = 0;
-			int m_nextTileIndex = 0;
-			int m_numPreviousWords = 0;
-			
-			bool m_devMode = false;
+    Recycler m_tileRecycler;
+    bool m_hideRecyclerAnimation = false;
 
-			// num tiles total for the entire game
-			int m_numTilesLeft = 0;
-			// num tiles lengthwise across the board
-			const int m_numTiles = 0;
-			// num tiles across the entire game
-			const int m_numTilesTotal;
+    bool m_gameRunning = false;
 
-			int m_numGames = 1;
-			size_t m_targetScore = 10;
-		};
-	}
-}
+    nlohmann::json mj_vowelsAndCons;
+
+    size_t m_score = 0;
+    uint8_t m_numRounds = 0;
+    int m_nextTileIndex = 0;
+    int m_numPreviousWords = 0;
+
+    bool m_devMode = false;
+
+    // num tiles total for the entire game
+    int m_numTilesLeft = 0;
+    // num tiles lengthwise across the board
+    const int m_numTiles = 0;
+    // num tiles across the entire game
+    const int m_numTilesTotal;
+
+    int m_numGames = 1;
+    size_t m_targetScore = 10;
+};
+} // namespace GameComponents
+} // namespace App

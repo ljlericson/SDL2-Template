@@ -1,9 +1,10 @@
 {
     "id":"increasedPoints",
     "description":"Gives increased points",
-    "cost": 30
-    ,
+    "cost": 30,
     "rarity": 1,
+		"spriteSheet": "<DEFAULT>",
+		"spriteSheetFrame": 0,
     "stackable": true,
     "script":"<NO-SCRIPT>",
     "staticModifiers": {

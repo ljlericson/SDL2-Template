@@ -4,6 +4,8 @@
     "cost": 100,
     "stackable": true,
     "rarity": 2,
+		"spriteSheet": "<DEFAULT>",
+		"spriteSheetFrame": 1,
     "script":"./config/modifiers/scripts/fourLengthWordMultiplyer.lua",
     "staticModifiers": {
         

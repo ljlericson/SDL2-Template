@@ -1,10 +1,7 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <unordered_map>
-#include <array>
-#include <filesystem>
-#include <fstream>
-#include <functional>
 
 #include <nlohmann/json.hpp>
 
@@ -12,49 +9,47 @@
 
 namespace App
 {
-	namespace Shop
-	{
-		struct ModifierInfo
-		{
-			ModifierInfo() { localID = s_numModifiers;  s_numModifiers++; }
-			~ModifierInfo() { s_numModifiers--; }
+namespace Shop
+{
+struct ModifierInfo
+{
+    // json
+    nlohmann::json json;
+    // basic config info
+    std::string id;
+    std::string description;
+    int rarity = 0;
+    int cost = 0;
+    bool stackable = false;
+    // spriteSheet info
+    int spriteSheetFrame = 0;
+    std::string spriteSheetFPath;
+};
 
-			nlohmann::json json;
-			std::string id;
-			std::string description;
-			int rarity = 0;
-			int cost = 0;
-			bool stackable = false;
+class ModifierManager
+{
+  public:
+    ModifierManager();
 
-			size_t localID = 0;
+    int getBonusPoints(const std::vector<std::string>& words, int points, const char* event,
+                       const int numRemainingTiles) const;
 
-		private:
-			static inline size_t s_numModifiers;
-		};
+    int getBonusPoints(char ch, int points, const char* event) const;
 
-		class ModifierManager
-		{
-		public:
-			ModifierManager();
+    float getStaticPriceReduction(int points);
 
-			int getBonusPoints(const std::vector<std::string>& words, int points, const char* event, const int numRemainingTiles, const int wordDelta) const;
+    std::vector<std::reference_wrapper<const ModifierInfo>> getShopOptions(size_t num) const;
 
-			int getBonusPoints(char ch, int points, const char* event) const;
+    void selectOption(const std::string& id);
 
-			float getStaticPriceReduction(int points);
+    void listModifiersInChat() const;
 
-			std::vector<std::reference_wrapper<const ModifierInfo>> getShopOptions(size_t num) const;
+    void listActiveModifiersInChat() const;
 
-			void selectOption(const std::string& id);
-
-			void listModifiersInChat() const;
-
-			void listActiveModifiersInChat() const;
-			 
-		private:
-			std::unordered_map<std::string, ModifierInfo> m_modifierInfo;
-			std::unordered_map<std::string, std::unique_ptr<Modifier>> m_modifiers;
-			std::vector<std::string> m_indexToID;
-		};
-	}
-}
+  private:
+    std::unordered_map<std::string, ModifierInfo> m_modifierInfo;
+    std::unordered_map<std::string, std::unique_ptr<Modifier>> m_modifiers;
+    std::vector<std::string> m_indexToID;
+};
+} // namespace Shop
+} // namespace App

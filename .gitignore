@@ -11,6 +11,8 @@ imgui.ini
 
 # VS Code settings
 .vscode/
+.cache/
+.clang-format/
 
 # --- BUILD FOLDERS ---
 
@@ -28,3 +30,5 @@ assets/audio/
 assets/skybox
 # vcpkg
 vcpkg_installed/
+
+compile_commands.json

@@ -1,0 +1,28 @@
+BasedOnStyle: LLVM
+Language: Cpp
+
+# ---- Pointer / reference style ----
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Ensures:
+# int* p;
+# int& r;
+
+# ---- Braces on next line (Allman style) ----
+BreakBeforeBraces: Allman
+
+# ---- Function / control statement formatting ----
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# ---- Indentation ----
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# ---- Misc sanity ----
+ColumnLimit: 100
+SpacesInParentheses: false
+SpaceBeforeParens: ControlStatements
